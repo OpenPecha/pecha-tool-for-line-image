@@ -11,11 +11,10 @@ datasource db {
 }
 
 model Group {
-  id            Int         @id @default(autoincrement())
-  name          String      @db.VarChar(255)
-  users         User[]
-  tasks         Task[]
-  department_id Int?
+  id    Int    @id @default(autoincrement())
+  name  String @db.VarChar(255)
+  users User[]
+  tasks Task[]
 }
 
 enum Role {
@@ -24,7 +23,6 @@ enum Role {
 }
 
 enum State {
-  imported
   transcribing
   trashed
   submitted
@@ -35,7 +33,7 @@ model Task {
   id                     Int       @id @default(autoincrement())
   group_id               Int
   group                  Group     @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state                  State     @default(imported)
+  state                  State     @default(transcribing)
   inference_transcript   String?   @db.VarChar(500)
   transcript             String?   @db.VarChar(500)
   reviewed_transcript    String?   @db.VarChar(500)
@@ -50,16 +48,15 @@ model Task {
   reviewed_at            DateTime?
   duration               String?
   audio_duration         Float     @default(0)
-  transcriber_is_correct Boolean?
 }
 
 model User {
-  id                  Int    @id @default(autoincrement())
-  name                String @unique @db.VarChar(255)
-  email               String @unique @db.VarChar(255)
-  group_id            Int
-  role                Role   @default(TRANSCRIBER)
-  transcriber_task    Task[] @relation("TranscriberTasks")
-  reviewer_task       Task[] @relation("ReviewerTasks")
-  group               Group  @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id               Int    @id @default(autoincrement())
+  name             String @unique @db.VarChar(255)
+  email            String @unique @db.VarChar(255)
+  group_id         Int
+  role             Role   @default(TRANSCRIBER)
+  transcriber_task Task[] @relation("TranscriberTasks")
+  reviewer_task    Task[] @relation("ReviewerTasks")
+  group            Group  @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
