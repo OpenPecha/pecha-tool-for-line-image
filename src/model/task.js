@@ -1,13 +1,9 @@
 "use server";
 
 import prisma from "@/service/db";
-import { $Enums } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
-export const getCompletedTaskCount = async (
-  id: string,
-  role: $Enums.Role
-): Promise<number | undefined> => {
+export const getCompletedTaskCount = async (id, role) => {
   try {
     switch (role) {
       case "TRANSCRIBER":
@@ -45,11 +41,7 @@ export const getCompletedTaskCount = async (
 };
 
 // get user progress based on the role, user id and group id
-export const UserProgressStats = async (
-  id: string,
-  role: $Enums.Role,
-  groupId: string
-) => {
+export const UserProgressStats = async (id, role, groupId) => {
   let completedTaskCount = 0;
   let totalTaskCount = 0;
   let totalTaskPassed = 0;

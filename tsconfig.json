@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     "src/components/AudioTranscript.js",
     "src/components/LanguageToggle.js"
-, "src/model/task.ts"  ],
+, "src/model/task.js", "src/model/action.js"  ],
   "exclude": ["node_modules"]
 }

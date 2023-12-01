@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 const ASSIGN_TASKS = 5;
 //get user detail if exist
-export const getUserDetails = async (username: string) => {
+export const getUserDetails = async (username) => {
   const userData = await prisma.user.findUnique({
     where: {
       name: username,
@@ -23,7 +23,7 @@ export const getUserDetails = async (username: string) => {
 };
 
 // get task based on username
-export const getUserTask = async (username: string) => {
+export const getUserTask = async (username) => {
   let userTasks;
   const userData = await getUserDetails(username);
   if (userData === null) {
@@ -38,11 +38,7 @@ export const getUserTask = async (username: string) => {
   return { userTasks, userData, userHistory };
 };
 
-export const getTasksOrAssignMore = async (
-  groupId: number,
-  userId: number,
-  role: $Enums.Role
-) => {
+export const getTasksOrAssignMore = async (groupId, userId, role) => {
   try {
     switch (role) {
       case "TRANSCRIBER":
@@ -174,12 +170,12 @@ export const getTasksOrAssignMore = async (
     }
   } catch (e) {
     //console.log("Error occurred while getting user task:", error);
-    throw new Error(e);
+    throw new Error(e.message);
   }
 };
 
 // get all the history of a user based on userId
-export const getUserHistory = async (userId: number) => {
+export const getUserHistory = async (userId) => {
   try {
     const userHistory = await prisma.task.findMany({
       where: {
@@ -208,7 +204,7 @@ export const getUserHistory = async (userId: number) => {
 };
 
 // to change the state of task based on user action (state machine)
-export const changeTaskState = (task, role: $Enums.Role, action: string) => {
+export const changeTaskState = (task, role, action) => {
   switch (role) {
     case "TRANSCRIBER":
       return action === "submit"
@@ -316,7 +312,7 @@ export const updateTask = async (
   }
 };
 
-export const taskToastMsg = async (action: string) => {
+export const taskToastMsg = async (action) => {
   switch (action) {
     case "submit":
       return {
