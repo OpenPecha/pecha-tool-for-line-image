@@ -3,6 +3,76 @@
 import prisma from "@/service/db";
 import { revalidatePath } from "next/cache";
 
+// get all tasks basd on the search params
+export const getAllTask = async (limit, skip) => {
+  try {
+    const tasks = await prisma.task.findMany({
+      skip: skip,
+      take: limit,
+      orderBy: {
+        id: "desc",
+      },
+    });
+    return tasks;
+  } catch (error) {
+    console.error("Error getting all the tasks:", error);
+    throw new Error(error);
+  }
+};
+
+//get the total count of tasks
+export const getTotalTaskCount = async () => {
+  try {
+    const totalTask = await prisma.task.count({});
+    return totalTask;
+  } catch (error) {
+    console.error("Error fetching the count of lists:", error);
+    throw new Error(error);
+  }
+};
+
+export async function createTasksFromCSV(formData) {
+  let tasksToCreate = [];
+  try {
+    const groupId = formData.get("group_id");
+    const tasksFile = formData.get("tasks");
+    const parsedTasksFile = JSON.parse(tasksFile);
+    // Create an array to hold task data
+    tasksToCreate = await Promise.all(
+      parsedTasksFile.map((row) => {
+        // Extract data from the CSV row
+        const inference_transcript = row.inference_transcript;
+        const fileName = row.file_name;
+        const url = row.url;
+
+        // Return task data as an object
+        return {
+          group_id: parseInt(groupId),
+          inference_transcript: inference_transcript,
+          file_name: fileName,
+          url: url,
+        };
+      })
+    );
+  } catch (error) {
+    console.error("Error parsing tasks file:", error);
+    return { count: 0 };
+  }
+
+  try {
+    // Use createMany to insert all tasks at once
+    const tasksCreated = await prisma.task.createMany({
+      data: tasksToCreate,
+      skipDuplicates: true,
+    });
+    revalidatePath("/dashboard/task");
+    return tasksCreated;
+  } catch (error) {
+    console.error("Error creating tasks:", error);
+    return { count: 0 };
+  }
+}
+
 export const getCompletedTaskCount = async (id, role) => {
   try {
     switch (role) {

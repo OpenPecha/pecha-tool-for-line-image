@@ -22,11 +22,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
     }
   }
 
-  // const routes = [
-  //   { name: "Dashboard", path: "/dashboard" },
-  //   { name: "Report", path: "/report" },
-  //   { name: "Stats", path: "/stats" },
-  // ];
+  const routes = [{ name: "Dashboard", path: "/dashboard" }];
 
   return (
     <div className="flex flex-col justify-center items-center overflow-y-auto">
@@ -36,7 +32,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
             please log in to it with correct username - ?session=username
             <span className="block">or</span>
           </div>
-          {/* <div className="flex flex-col gap-6 sm:flex-row">
+          <div className="flex flex-col gap-6 sm:flex-row">
             {routes.map((route) => (
               <Link
                 key={route.name}
@@ -47,7 +43,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
                 {route.name}
               </Link>
             ))}
-          </div> */}
+          </div>
         </>
       ) : errMsg ? (
         <div className="mt-10 p-5 text-xl font-semibold text-center">
