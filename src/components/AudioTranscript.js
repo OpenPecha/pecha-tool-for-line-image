@@ -119,59 +119,61 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
         userHistory={userHistory}
       >
         {/* Page content here */}
-        {isLoading ? (
-          <div className="flex flex-col justify-center items-center mt-10 p-5">
+        <div className="h-full w-full flex flex-col justify-center items-center">
+          {isLoading ? (
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
-          </div>
-        ) : taskList?.length ? (
-          <>
-            {role === "REVIEWER" && (
-              <p className="mt-4 md:mt-10">
-                <strong>{lang.transcriber} : </strong>
-                <span>{taskList[0]?.transcriber?.name}</span>
-              </p>
-            )}
-            <div className="border rounded-md shadow-sm shadow-gray-400 w-11/12 md:w-3/4 p-4 md:p-6 mt-4 md:mt-10">
-              <div className="flex flex-col gap-4 justify-center items-center">
-                {/* display a responsive img here */}
-                <Image
-                  src={taskList[0]?.url}
-                  alt="image"
-                  className="object-cover w-auto h-auto"
-                  width={500}
-                  height={500}
-                  priority={true}
-                />
-                <textarea
-                  value={transcript || ""}
-                  onChange={(e) => setTranscript(e.target.value)}
-                  className="rounded-md p-4 border border-slate-400 w-full text-xl"
-                  placeholder="Type here..."
-                  rows={4}
-                  id="transcript"
-                ></textarea>
-                <div className="ml-auto text-xs">
-                  <span>
-                    <strong className="uppercase">{lang.file} : </strong>
-                    {(taskList[0]?.url).split("/").pop()}
-                  </span>
+          ) : taskList?.length ? (
+            <>
+              {role === "REVIEWER" && (
+                <p className="mt-4 md:mt-10">
+                  <strong>{lang.transcriber} : </strong>
+                  <span>{taskList[0]?.transcriber?.name}</span>
+                </p>
+              )}
+              <div className="flex flex-1 flex-col max-w-4xl w-11/12 md:w-3/4 mt-4 md:mt-10">
+                <div className="flex flex-col gap-4 border rounded-md shadow-sm shadow-gray-400 items-center p-4 md:p-6">
+                  {/* display a responsive img here */}
+                  <Image
+                    src={taskList[0]?.url}
+                    alt="image"
+                    className="object-fit rounded-md"
+                    width={500}
+                    height={300}
+                    style={{
+                      maxHeight: "40vh",
+                    }}
+                  />
+                  <textarea
+                    value={transcript || ""}
+                    onChange={(e) => setTranscript(e.target.value)}
+                    className="rounded-md p-4 border border-slate-400 w-full text-xl"
+                    placeholder="Type here..."
+                    rows={4}
+                    id="transcript"
+                  ></textarea>
+                  <div className="ml-auto text-xs">
+                    <span>
+                      <strong className="uppercase">{lang.file} : </strong>
+                      {(taskList[0]?.url).split("/").pop()}
+                    </span>
+                  </div>
                 </div>
               </div>
+              <ActionButtons
+                updateTaskAndIndex={updateTaskAndIndex}
+                tasks={taskList}
+                transcript={transcript}
+                role={role}
+              />
+            </>
+          ) : (
+            <div className="flex flex-col justify-center items-center mt-10 p-5">
+              <h1 className="font-bold text-lg md:text-3xl">
+                No task found, will allocate soon
+              </h1>
             </div>
-            <ActionButtons
-              updateTaskAndIndex={updateTaskAndIndex}
-              tasks={taskList}
-              transcript={transcript}
-              role={role}
-            />
-          </>
-        ) : (
-          <div className="flex flex-col justify-center items-center mt-10 p-5">
-            <h1 className="font-bold text-lg md:text-3xl">
-              No task found, will allocate soon
-            </h1>
-          </div>
-        )}
+          )}
+        </div>
       </Sidebar>
     </AppContext.Provider>
   );
