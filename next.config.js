@@ -3,7 +3,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        hostname: "picsum.photos",
+        hostname: "s3.amazonaws.com",
       },
     ],
   },

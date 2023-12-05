@@ -42,14 +42,14 @@ export async function createTasksFromCSV(formData) {
       parsedTasksFile.map((row) => {
         // Extract data from the CSV row
         const inference_transcript = row.inference_transcript;
-        const fileName = row.file_name;
+        const id = row.id;
         const url = row.url;
 
         // Return task data as an object
         return {
           group_id: parseInt(groupId),
           inference_transcript: inference_transcript,
-          file_name: fileName,
+          id: id,
           url: url,
         };
       })
@@ -166,7 +166,7 @@ export const getTaskWithRevertedState = async (task, role) => {
     }
     const updatedTask = await prisma.task.update({
       where: {
-        id: parseInt(task.id),
+        id: task.id,
       },
       data: {
         state: newState,

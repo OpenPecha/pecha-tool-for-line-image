@@ -7,7 +7,7 @@ import AddGroupModal from "./AddGroupModal";
 import EditGroupModal from "./EditGroupModal";
 import { deleteGroup } from "@/model/group";
 
-const GroupDashboard = ({ groupList,  }) => {
+const GroupDashboard = ({ groupList }) => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handleRemoveGroup = async (row) => {
@@ -48,9 +48,6 @@ const GroupDashboard = ({ groupList,  }) => {
                   Group name
                 </th>
                 <th scope="col" className="px-6 py-3">
-                  Department name
-                </th>
-                <th scope="col" className="px-6 py-3">
                   No. Users
                 </th>
                 <th scope="col" className="px-6 py-3">
@@ -71,7 +68,6 @@ const GroupDashboard = ({ groupList,  }) => {
                     {row.id}
                   </th>
                   <td className="px-6 py-4">{row.name}</td>
-                  <td className="px-6 py-4">{row.Department?.name}</td>
                   <td className="px-6 py-4">{row._count.users || 0}</td>
                   <td className="px-6 py-4">{row._count.tasks || 0}</td>
                   <td className="flex items-center px-6 py-4 space-x-3">

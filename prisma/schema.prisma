@@ -30,24 +30,22 @@ enum State {
 }
 
 model Task {
-  id                     Int       @id @default(autoincrement())
-  group_id               Int
-  group                  Group     @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  state                  State     @default(transcribing)
-  inference_transcript   String?   @db.VarChar(500)
-  transcript             String?   @db.VarChar(500)
-  reviewed_transcript    String?   @db.VarChar(500)
-  file_name              String    @unique @db.VarChar(255)
-  url                    String    @unique @db.Text
-  transcriber_id         Int?
-  transcriber            User?     @relation("TranscriberTasks", fields: [transcriber_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  reviewer_id            Int?
-  reviewer               User?     @relation("ReviewerTasks", fields: [reviewer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  created_at             DateTime? @default(now())
-  submitted_at           DateTime?
-  reviewed_at            DateTime?
-  duration               String?
-  audio_duration         Float     @default(0)
+  id                   String    @id
+  group_id             Int
+  group                Group     @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  state                State     @default(transcribing)
+  inference_transcript String?   @db.VarChar(500)
+  transcript           String?   @db.VarChar(500)
+  reviewed_transcript  String?   @db.VarChar(500)
+  url                  String    @unique @db.Text
+  transcriber_id       Int?
+  transcriber          User?     @relation("TranscriberTasks", fields: [transcriber_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reviewer_id          Int?
+  reviewer             User?     @relation("ReviewerTasks", fields: [reviewer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  created_at           DateTime? @default(now())
+  submitted_at         DateTime?
+  reviewed_at          DateTime?
+  duration             String?
 }
 
 model User {
