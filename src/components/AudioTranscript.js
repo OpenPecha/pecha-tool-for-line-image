@@ -130,33 +130,24 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
                   <span>{taskList[0]?.transcriber?.name}</span>
                 </p>
               )}
-              <div className="flex flex-1 flex-col max-w-4xl w-11/12 md:w-3/4 mt-4 md:mt-10">
+              <div className="flex flex-1 flex-col w-11/12 mt-5 md:mt-20">
                 <div className="flex flex-col gap-4 border rounded-md shadow-sm shadow-gray-400 items-center p-4 md:p-6">
                   {/* display a responsive img here */}
                   <Image
                     src={taskList[0]?.url}
                     alt="image"
-                    className="object-fit rounded-md"
-                    width={500}
+                    width={1500}
                     height={300}
-                    style={{
-                      maxHeight: "40vh",
-                    }}
+                    className="rounded-md h-full"
                   />
                   <textarea
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}
-                    className="rounded-md p-4 border border-slate-400 w-full text-xl"
+                    className="rounded-md p-4 border border-slate-400 w-full h-full text-xl"
                     placeholder="Type here..."
-                    rows={4}
+                    rows={2}
                     id="transcript"
                   ></textarea>
-                  <div className="ml-auto text-xs">
-                    <span>
-                      <strong className="uppercase">{lang.file} : </strong>
-                      {(taskList[0]?.url).split("/").pop()}
-                    </span>
-                  </div>
                 </div>
               </div>
               <ActionButtons
