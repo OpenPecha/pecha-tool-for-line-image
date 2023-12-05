@@ -143,7 +143,7 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
                   <textarea
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}
-                    className="rounded-md p-4 border border-slate-400 w-full h-full text-xl"
+                    className="font-Petsuk rounded-md p-4 border border-slate-400 w-full h-full text-xl"
                     placeholder="Type here..."
                     rows={2}
                     id="transcript"
