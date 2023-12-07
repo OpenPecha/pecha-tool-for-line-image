@@ -1,28 +1,29 @@
 import React from "react";
-import AppContext from "./AppContext";
+import AppContext from "@/components/AppContext";
 import { useContext } from "react";
-import LanguageToggle from "./LanguageToggle";
+import LanguageToggle from "@/components/LanguageToggle";
 import { BsCheckLg, BsTrash } from "react-icons/bs";
 import { getTaskWithRevertedState } from "@/model/task";
 
-const Sidebar = ({
+const DemoSidebar = ({
   children,
   userDetail,
-  userTaskStats,
   taskList,
   role,
   setTaskList,
   userHistory,
+  setHistoryList,
 }) => {
-  const { completedTaskCount, totalTaskCount, totalTaskPassed } = userTaskStats;
   const value = useContext(AppContext);
   let { lang } = value;
+  const totalTaskCount = 10;
 
   const handleHistoryClick = async (task) => {
     // get the task from db with task state step down by 1
     // if it is not, just push the new task to the top
-    const newTask = await getTaskWithRevertedState(task, role);
+    const newTask = await getTaskWithRevertedState(task);
     setTaskList([newTask, ...taskList]);
+    setHistoryList((prev) => prev.filter((t) => t.id !== task.id));
     return;
   };
 
@@ -79,11 +80,11 @@ const Sidebar = ({
               <h3 className="uppercase font-bold mb-2">{lang.target}</h3>
               <div
                 className="tooltip tooltip-bottom w-full mt-2 mb-6"
-                data-tip={`${completedTaskCount}/${totalTaskCount}`}
+                data-tip={`${userHistory.length}/${totalTaskCount}`}
               >
                 <progress
                   className="progress progress-success"
-                  value={completedTaskCount}
+                  value={userHistory?.length}
                   max={totalTaskCount}
                 ></progress>
               </div>
@@ -95,10 +96,10 @@ const Sidebar = ({
                     : "No. of task reviewed by you"
                 }
               >
-                <label className=" text-sm font-bold mb-2">
+                <label className="text-sm font-bold mb-2">
                   {role === "TRANSCRIBER" ? lang.submitted : lang.reviewed}
                 </label>
-                <span className="text-right">{completedTaskCount}</span>
+                <span className=" text-right">{userHistory?.length}</span>
               </div>
               {(role === "TRANSCRIBER" || role === "REVIEWER") && (
                 <div
@@ -118,21 +119,14 @@ const Sidebar = ({
                       ? lang.final_reviewed
                       : ""}
                   </label>
-                  <span className=" text-right">{totalTaskPassed}</span>
+                  <span className=" text-right">0</span>
                 </div>
               )}
-              <div
-                className="tooltip tooltip-top flex text-right justify-between"
-                data-tip={
-                  role === "TRANSCRIBER" || role === "REVIEWER"
-                    ? "No. of task assigned to you"
-                    : "No. of task accepted"
-                }
-              >
+              <div className="flex text-right justify-between">
                 <label className="text-sm font-bold mb-2">
-                  {role === "TRANSCRIBER" || role === "REVIEWER"
+                  {role === "TRANSCRIBER"
                     ? lang.total_assigned
-                    : "Total Accepted"}
+                    : lang.total_submitted}
                 </label>
                 <span className=" text-right">{totalTaskCount}</span>
               </div>
@@ -145,31 +139,33 @@ const Sidebar = ({
               <h3 className="uppercase font-bold pb-2 top-0 sticky bg-[#54606e]">
                 {lang.history}
               </h3>
-              {userHistory.map((task) => (
-                <div
-                  key={task.id}
-                  className="py-4 cursor-pointer flex justify-between gap-1 items-center border-b-2 border-b-[#384451]"
-                  onClick={() => handleHistoryClick(task)}
-                >
-                  <p className="text-lg line-clamp-2">
-                    {role === "TRANSCRIBER"
-                      ? task.transcript !== null
-                        ? task.transcript
-                        : task.inference_transcript
-                      : task.reviewed_transcript !== null
-                      ? task.reviewed_transcript
-                      : task.transcript}
-                  </p>
+              {userHistory
+                .filter((task) => task.state === "submitted")
+                .map((task) => (
                   <div
-                    className="tooltip tooltip-left"
-                    data-tip={`${task.state}`}
+                    key={task.id}
+                    className="py-4 cursor-pointer flex justify-between gap-1 items-center border-b-2 border-b-[#384451]"
+                    onClick={() => handleHistoryClick(task)}
                   >
-                    {(task.state === "submitted" ||
-                      task.state === "accepted") && <BsCheckLg size="1rem" />}
-                    {task.state === "trashed" && <BsTrash size="1rem" />}
+                    <p className="text-lg line-clamp-2">
+                      {role === "TRANSCRIBER"
+                        ? task.transcript !== null
+                          ? task.transcript
+                          : task.inference_transcript
+                        : task.reviewed_transcript !== null
+                        ? task.reviewed_transcript
+                        : task.transcript}
+                    </p>
+                    <div
+                      className="tooltip tooltip-left"
+                      data-tip={`${task.state}`}
+                    >
+                      {(task.state === "submitted" ||
+                        task.state === "accepted") && <BsCheckLg size="1rem" />}
+                      {task.state === "trashed" && <BsTrash size="1rem" />}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </section>
           </div>
         </div>
@@ -178,4 +174,4 @@ const Sidebar = ({
   );
 };
 
-export default Sidebar;
+export default DemoSidebar;
