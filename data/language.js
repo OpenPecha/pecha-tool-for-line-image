@@ -1,6 +1,6 @@
   let languagesObject = {
     en: {
-      title: "Pecha Line Image Tool",
+      title: "Pecha STT Tool",
       project: "Project Info",
       user: "User",
       group: "Group",
