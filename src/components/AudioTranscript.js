@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import Image from "next/image";
+import FlowSidebar from "./FlowSidebar";
 
 const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -110,20 +111,23 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
     <AppContext.Provider
       value={{ languageSelected, setLanguageSelected, lang }}
     >
-      <Sidebar
-        userDetail={userDetail}
-        userTaskStats={userTaskStats}
-        taskList={taskList}
-        role={role}
-        setTaskList={setTaskList}
-        userHistory={userHistory}
-      >
-        {/* Page content here */}
-        <div className="h-full w-full flex flex-col justify-center items-center">
-          {isLoading ? (
-            <h1 className="font-bold text-md md:text-3xl">loading...</h1>
-          ) : taskList?.length ? (
-            <>
+      <div className="flex flex-col lg:flex-row h-screen gap-3">
+        {isLoading ? (
+          <h1 className="flex items-center font-bold text-md md:text-3xl">
+            loading...
+          </h1>
+        ) : taskList?.length ? (
+          <>
+            <FlowSidebar
+              userDetail={userDetail}
+              userTaskStats={userTaskStats}
+              taskList={taskList}
+              role={role}
+              setTaskList={setTaskList}
+              userHistory={userHistory}
+            />
+            {/* Page content here */}
+            <div className="h-full w-full flex flex-col justify-center items-center">
               {role === "REVIEWER" && (
                 <p className="mt-4 md:mt-10">
                   <strong>{lang.transcriber} : </strong>
@@ -156,16 +160,16 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
                 transcript={transcript}
                 role={role}
               />
-            </>
-          ) : (
-            <div className="flex flex-col justify-center items-center mt-10 p-5">
-              <h1 className="font-bold text-lg md:text-3xl">
-                No task found, will allocate soon
-              </h1>
             </div>
-          )}
-        </div>
-      </Sidebar>
+          </>
+        ) : (
+          <div className="flex flex-col justify-center items-center mt-10 p-5">
+            <h1 className="font-bold text-lg md:text-3xl">
+              No task found, will allocate soon
+            </h1>
+          </div>
+        )}
+      </div>
     </AppContext.Provider>
   );
 };

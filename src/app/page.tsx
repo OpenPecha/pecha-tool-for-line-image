@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getUserHistory, getUserTask } from "../model/action";
+import { getUserTask } from "../model/action";
 import AudioTranscript from "../components/AudioTranscript";
 import languagesObject from "../../data/language";
+import { Button } from "flowbite-react";
 
 export default async function Home({ searchParams }: { searchParams: any }) {
   const language = languagesObject;
@@ -34,14 +35,14 @@ export default async function Home({ searchParams }: { searchParams: any }) {
           </div>
           <div className="flex flex-col gap-6 sm:flex-row">
             {routes.map((route) => (
-              <Link
+              <Button
                 key={route.name}
                 href={route.path}
-                type="button"
-                className="btn btn-accent"
+                size={"lg"}
+                className="bg-teal-400 font-semibold text-black"
               >
                 {route.name}
-              </Link>
+              </Button>
             ))}
           </div>
         </>
