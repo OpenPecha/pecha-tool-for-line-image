@@ -19,7 +19,6 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
     totalTaskCount: 0,
     totalTaskPassed: 0,
   }); // {completedTaskCount, totalTaskCount, totalTaskPassed}
-  const audioRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const { id: userId, group_id: groupId, role } = userDetail;
   const currentTimeRef = useRef(null);
@@ -44,9 +43,6 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
           taskList[0].reviewed_transcript != ""
             ? setTranscript(taskList[0]?.reviewed_transcript)
             : setTranscript(taskList[0]?.transcript);
-          break;
-        case "FINAL_REVIEWER":
-          setTranscript(taskList[0]?.reviewed_transcript);
           break;
         default:
           break;
