@@ -63,6 +63,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
               where: {
                 group_id: groupId,
                 state: "transcribing",
+                transcriber_id: null,
               },
               orderBy: {
                 id: "asc",
@@ -128,6 +129,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
               where: {
                 group_id: groupId,
                 state: "submitted",
+                reviewer_id: null,
               },
               orderBy: {
                 id: "asc",
