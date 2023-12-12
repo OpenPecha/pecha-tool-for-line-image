@@ -15,7 +15,7 @@ export const getAllTask = async (limit, skip) => {
     });
     return tasks;
   } catch (error) {
-    console.error("Error getting all the tasks:", error);
+    // console.error("Error getting all the tasks:", error);
     throw new Error(error);
   }
 };
@@ -26,7 +26,7 @@ export const getTotalTaskCount = async () => {
     const totalTask = await prisma.task.count({});
     return totalTask;
   } catch (error) {
-    console.error("Error fetching the count of lists:", error);
+    // console.error("Error fetching the count of lists:", error);
     throw new Error(error);
   }
 };
@@ -55,7 +55,7 @@ export async function createTasksFromCSV(formData) {
       })
     );
   } catch (error) {
-    console.error("Error parsing tasks file:", error);
+    // console.error("Error parsing tasks file:", error);
     return { count: 0 };
   }
 
@@ -68,7 +68,7 @@ export async function createTasksFromCSV(formData) {
     revalidatePath("/dashboard/task");
     return tasksCreated;
   } catch (error) {
-    console.error("Error creating tasks:", error);
+    // console.error("Error creating tasks:", error);
     return { count: 0 };
   }
 }
@@ -179,7 +179,7 @@ export const getTaskWithRevertedState = async (task, role) => {
     revalidatePath("/");
     return updatedTask;
   } catch (error) {
-    console.error("Error getting reverted state task:", error);
+    // console.error("Error getting reverted state task:", error);
     throw new Error(error);
   }
 };

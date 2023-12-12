@@ -176,7 +176,7 @@ export const getUsersByGroup = async (groupId) => {
     });
     return users;
   } catch (error) {
-    console.error("Error getting users by group:", error);
+    // console.error("Error getting users by group:", error);
     throw new Error(error);
   }
 };
