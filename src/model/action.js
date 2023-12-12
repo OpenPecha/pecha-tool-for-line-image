@@ -7,10 +7,10 @@ import { revalidatePath } from "next/cache";
 
 const ASSIGN_TASKS = 5;
 //get user detail if exist
-export const getUserDetails = async (username) => {
+export const getUserDetails = async (email) => {
   const userData = await prisma.user.findUnique({
     where: {
-      name: username,
+      email,
     },
     include: {
       group: true,
@@ -23,9 +23,9 @@ export const getUserDetails = async (username) => {
 };
 
 // get task based on username
-export const getUserTask = async (username) => {
+export const getUserTask = async (email) => {
   let userTasks;
-  const userData = await getUserDetails(username);
+  const userData = await getUserDetails(email);
   if (userData === null) {
     return {
       error:
@@ -55,6 +55,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
               id: "asc",
             },
           });
+          console.log("assignedTasks", assignedTasks);
           if (assignedTasks === null) {
             throw new Error("No task found for TRANSCRIBER!.");
           }
@@ -71,6 +72,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
               },
               take: ASSIGN_TASKS,
             });
+            console.log("moreTasks", moreTasks);
             if (moreTasks.length === 0) {
               return moreTasks;
             } else {
@@ -82,6 +84,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
                   transcriber_id: userId,
                 },
               });
+              console.log("newAssignedTaskCount", newAssignedTaskCount);
               return await prisma.task.findMany({
                 where: {
                   group_id: groupId,
