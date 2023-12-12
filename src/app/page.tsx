@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getUserHistory, getUserTask } from "../model/action";
+import { getUserTask } from "../model/action";
 import AudioTranscript from "../components/AudioTranscript";
 import languagesObject from "../../data/language";
+import RightSidebar from "@/components/RightSidebar";
 
 export default async function Home({ searchParams }: { searchParams: any }) {
   const language = languagesObject;
@@ -57,6 +58,12 @@ export default async function Home({ searchParams }: { searchParams: any }) {
           userHistory={userHistory}
         />
       )}
+      <RightSidebar>
+        <iframe
+          className="h-full"
+          src="https://docs.google.com/spreadsheets/d/1qIvW5i6Pb8UTpzVXZC93NMfmhrWahtvJBOTEQ2cWEq8/edit"
+        ></iframe>
+      </RightSidebar>
     </div>
   );
 }
