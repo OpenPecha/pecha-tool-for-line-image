@@ -34,7 +34,7 @@ const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
 
   return (
     <>
-      <div className="md:fixed bottom-0 mt-4 flex gap-1 border shadow-sm p-2">
+      <div className="fixed bottom-0 mt-4 flex gap-1 border shadow-sm p-2">
         <div className="md:tooltip tooltip-top" data-tip="Submit(Alt + a)">
           <button
             id="submit-button"
