@@ -77,7 +77,6 @@ const TaskForm = ({ groups }) => {
           className="btn btn-accent"
           formAction={async (formData) => {
             ref.current?.reset();
-            //console.log("formData", formData.get("group_id"), formData.get("file_name"));
             uploadTask(formData);
           }}
         >

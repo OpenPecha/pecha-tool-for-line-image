@@ -135,6 +135,7 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
                     width={1500}
                     height={300}
                     className="rounded-md h-full"
+                    priority={true}
                   />
                   <textarea
                     value={transcript || ""}

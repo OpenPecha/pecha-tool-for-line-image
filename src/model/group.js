@@ -17,7 +17,7 @@ export const getAllGroup = async () => {
     });
     return allGroup;
   } catch (error) {
-    console.error("Error getting all group:", error);
+    // console.error("Error getting all group:", error);
     throw new Error(error);
   }
 };
