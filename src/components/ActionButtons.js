@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { BsCheckLg, BsXLg, BsArrowReturnLeft, BsTrash } from "react-icons/bs";
+import { BsCheckLg, BsXLg, BsTrash } from "react-icons/bs";
 import { useContext, useEffect } from "react";
 import AppContext from "./AppContext";
 
@@ -39,10 +39,10 @@ const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
           <button
             id="submit-button"
             type="button"
-            className="focus:outline-none text-white bg-[#4fd364] font-medium text-md p-4 sm:p-9"
+            className="focus:outline-none text-white bg-[#4fd364] font-medium text-md w-32 md:w-36 h-full p-4 md:py-9"
             onClick={() => updateTaskAndIndex("submit", transcript, tasks[0])}
           >
-            <div className="flex flex-col items-center">
+            <div className="flex gap-2 flex-col items-center">
               <BsCheckLg width="5rem" />
               <p>{lang.submit}</p>
             </div>
@@ -53,10 +53,10 @@ const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
             <button
               id="reject-button"
               type="button"
-              className="focus:outline-none text-white bg-[#f74c4a] font-medium text-md p-4 sm:p-9"
+              className="focus:outline-none text-white bg-[#f74c4a] font-medium text-md w-32 md:w-36 h-full p-4 md:py-9"
               onClick={() => updateTaskAndIndex("reject", transcript, tasks[0])}
             >
-              <div className="flex flex-col items-center">
+              <div className="flex gap-2 flex-col items-center">
                 <BsXLg />
                 <p>{lang.reject}</p>
               </div>
@@ -68,10 +68,10 @@ const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
             <button
               id="trash-button"
               type="button"
-              className="focus:outline-none text-white bg-[#b9b9b9] font-medium text-md p-4 sm:p-9"
+              className="focus:outline-none text-white bg-[#b9b9b9] font-medium text-md w-32 md:w-36 h-full p-4 md:py-9"
               onClick={() => updateTaskAndIndex("trash", transcript, tasks[0])}
             >
-              <div className="flex flex-col items-center">
+              <div className="flex gap-2 flex-col items-center">
                 <BsTrash />
                 <p>{lang.trash}</p>
               </div>
