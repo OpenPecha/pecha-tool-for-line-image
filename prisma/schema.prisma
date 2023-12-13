@@ -11,11 +11,10 @@ datasource db {
 }
 
 model Group {
-  id       Int    @id @default(autoincrement())
-  name     String @db.VarChar(255)
-  batch_id String @default("batch") @db.VarChar(255)
-  users    User[]
-  tasks    Task[]
+  id    Int    @id @default(autoincrement())
+  name  String @db.VarChar(255)
+  users User[]
+  tasks Task[]
 }
 
 enum Role {
@@ -33,6 +32,7 @@ enum State {
 model Task {
   id                   String    @id
   group_id             Int
+  batch_id             String    @db.VarChar(255)
   group                Group     @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   state                State     @default(transcribing)
   inference_transcript String?   @db.VarChar(500)
