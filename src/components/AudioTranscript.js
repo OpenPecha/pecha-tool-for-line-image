@@ -126,25 +126,23 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
                   <span>{taskList[0]?.transcriber?.name}</span>
                 </p>
               )}
-              <div className="flex flex-1 flex-col w-11/12 mt-5 md:mt-20">
-                <div className="flex flex-col gap-4 border rounded-md shadow-sm shadow-gray-400 items-center p-4 md:p-6">
-                  {/* display a responsive img here */}
+              <div className="flex flex-1 flex-col w-[95%] mt-5 md:mt-20">
+                <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <Image
                     src={taskList[0]?.url}
                     alt="image"
                     width={1500}
-                    height={300}
-                    className="rounded-md h-full"
+                    height={400}
+                    className="object-contain"
                     priority={true}
                   />
-                  <textarea
+                  <input
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}
                     className="font-Petsuk rounded-md p-4 border border-slate-400 w-full h-full text-xl"
                     placeholder="Type here..."
-                    rows={2}
                     id="transcript"
-                  ></textarea>
+                  />
                 </div>
               </div>
               <ActionButtons

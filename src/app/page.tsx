@@ -60,8 +60,8 @@ export default async function Home({ searchParams }: { searchParams: any }) {
       )}
       <RightSidebar>
         <iframe
-          className="h-full"
-          src="https://docs.google.com/spreadsheets/d/1qIvW5i6Pb8UTpzVXZC93NMfmhrWahtvJBOTEQ2cWEq8/edit"
+          className="w-full h-full"
+          src="https://docs.google.com/spreadsheets/d/e/2PACX-1vT5gDbwko0iKrR46GjJgsmMgGQXc6EiC9xBugl8BvV66pPz-czBeyO1DfVsti0jg-EJqTZ7dSUCu_qC/pubhtml?gid=991898896&amp;single=true&amp;widget=true&amp;headers=false"
         ></iframe>
       </RightSidebar>
     </div>

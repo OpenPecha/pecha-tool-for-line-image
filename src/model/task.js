@@ -44,6 +44,7 @@ export async function createTasksFromCSV(formData) {
         const inference_transcript = row.inference_transcript;
         const id = row.id;
         const url = row.url;
+        const batch_id = row.batch_id;
 
         // Return task data as an object
         return {
@@ -51,11 +52,12 @@ export async function createTasksFromCSV(formData) {
           inference_transcript: inference_transcript,
           id: id,
           url: url,
+          batch_id: batch_id,
         };
       })
     );
   } catch (error) {
-    // console.error("Error parsing tasks file:", error);
+    console.error("Error parsing tasks file:", error);
     return { count: 0 };
   }
 
@@ -68,7 +70,7 @@ export async function createTasksFromCSV(formData) {
     revalidatePath("/dashboard/task");
     return tasksCreated;
   } catch (error) {
-    // console.error("Error creating tasks:", error);
+    console.error("Error creating tasks:", error);
     return { count: 0 };
   }
 }

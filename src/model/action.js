@@ -55,7 +55,6 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
               id: "asc",
             },
           });
-          console.log("assignedTasks", assignedTasks);
           if (assignedTasks === null) {
             throw new Error("No task found for TRANSCRIBER!.");
           }
@@ -72,7 +71,6 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
               },
               take: ASSIGN_TASKS,
             });
-            console.log("moreTasks", moreTasks);
             if (moreTasks.length === 0) {
               return moreTasks;
             } else {
@@ -84,7 +82,6 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
                   transcriber_id: userId,
                 },
               });
-              console.log("newAssignedTaskCount", newAssignedTaskCount);
               return await prisma.task.findMany({
                 where: {
                   group_id: groupId,
