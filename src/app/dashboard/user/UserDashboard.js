@@ -13,7 +13,12 @@ const UserDashboard = ({ users, groups }) => {
   const handleRemoveUser = async (user) => {
     const noTranscriberTask = user._count.transcriber_task;
     const noReviewerTask = user._count.reviewer_task;
-    if (noTranscriberTask !== 0 || noReviewerTask !== 0) {
+    const noFinalReviewerTask = user._count.final_reviewer_task;
+    if (
+      noTranscriberTask !== 0 ||
+      noReviewerTask !== 0 ||
+      noFinalReviewerTask !== 0
+    ) {
       window.alert(`User ${user.name} has some uncomplete tasks!`);
     } else {
       const deletedUser = await deleteUser(user.id);

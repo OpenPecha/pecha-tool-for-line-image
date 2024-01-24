@@ -7,7 +7,6 @@ import RightSidebar from "@/components/RightSidebar";
 export default async function Home({ searchParams }: { searchParams: any }) {
   const language = languagesObject;
   const { session } = searchParams;
-  console.log("session", session);
   let userTasks;
   let userDetail;
   let errMsg;

@@ -96,7 +96,20 @@ export const getCompletedTaskCount = async (id, role) => {
           const completedTaskCount = await prisma.task.count({
             where: {
               reviewer_id: parseInt(id),
-              state: { in: ["accepted"] },
+              state: { in: ["accepted", "finalised"] },
+            },
+          });
+          return completedTaskCount;
+          break;
+        } catch (error) {
+          throw new Error(error);
+        }
+      case "FINAL_REVIEWER":
+        try {
+          const completedTaskCount = await prisma.task.count({
+            where: {
+              final_reviewer_id: parseInt(id),
+              state: { in: ["finalised"] },
             },
           });
           return completedTaskCount;
@@ -130,6 +143,10 @@ export const UserProgressStats = async (id, role, groupId) => {
             group_id: parseInt(groupId),
             reviewer_id: parseInt(id),
           },
+          {
+            group_id: parseInt(groupId),
+            final_reviewer_id: parseInt(id),
+          },
         ],
       },
     });
@@ -139,7 +156,12 @@ export const UserProgressStats = async (id, role, groupId) => {
           {
             group_id: parseInt(groupId),
             transcriber_id: parseInt(id),
-            state: { in: ["accepted"] },
+            state: { in: ["accepted", "finalised"] },
+          },
+          {
+            group_id: parseInt(groupId),
+            reviewer_id: parseInt(id),
+            state: { in: ["finalised"] },
           },
         ],
       },
@@ -165,6 +187,9 @@ export const getTaskWithRevertedState = async (task, role) => {
       (role === "REVIEWER" && task.state === "trashed")
     ) {
       newState = "submitted";
+    }
+    if (task.state === "finalised" || task.state === "trashed") {
+      newState = "accepted";
     }
     const updatedTask = await prisma.task.update({
       where: {

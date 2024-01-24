@@ -42,6 +42,10 @@ const AddUserModal = ({ groups }) => {
       name: "Reviewer",
       id: "REVIEWER",
     },
+    {
+      name: "Final Reviewer",
+      id: "FINAL_REVIEWER",
+    },
   ];
 
   return (

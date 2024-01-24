@@ -11,6 +11,7 @@ export const getAllUser = async () => {
           select: {
             transcriber_task: true,
             reviewer_task: true,
+            final_reviewer_task: true,
           },
         },
         group: true,

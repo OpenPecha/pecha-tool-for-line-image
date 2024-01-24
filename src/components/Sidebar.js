@@ -92,11 +92,17 @@ const Sidebar = ({
                 data-tip={
                   role === "TRANSCRIBER"
                     ? "No. of task submitted by you"
-                    : "No. of task reviewed by you"
+                    : role === "REVIEWER"
+                    ? "No. of task reviewed by you"
+                    : "No. of task finalised by you"
                 }
               >
                 <label className=" text-sm font-bold mb-2">
-                  {role === "TRANSCRIBER" ? lang.submitted : lang.reviewed}
+                  {role === "TRANSCRIBER"
+                    ? lang.submitted
+                    : role === "REVIEWER"
+                    ? lang.reviewed
+                    : lang.final_reviewed}
                 </label>
                 <span className="text-right">{completedTaskCount}</span>
               </div>

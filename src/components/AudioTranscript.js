@@ -44,6 +44,11 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
             ? setTranscript(taskList[0]?.reviewed_transcript)
             : setTranscript(taskList[0]?.transcript);
           break;
+        case "FINAL_REVIEWER":
+          taskList[0].final_reviewed_transcript != null &&
+          taskList[0].final_reviewed_transcript != ""
+            ? setTranscript(taskList[0]?.final_reviewed_transcript)
+            : setTranscript(taskList[0]?.reviewed_transcript);
         default:
           break;
       }
@@ -120,11 +125,19 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
           ) : taskList?.length ? (
             <>
-              {role === "REVIEWER" && (
-                <p className="mt-4 md:mt-10">
-                  <strong>{lang.transcriber} : </strong>
-                  <span>{taskList[0]?.transcriber?.name}</span>
-                </p>
+              {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
+                <div>
+                  <p className="mt-4 md:mt-10">
+                    <strong>{lang.transcriber} : </strong>
+                    <span>{taskList[0]?.transcriber?.name}</span>
+                  </p>
+                  {role === "FINAL_REVIEWER" && (
+                    <p className="mt-2">
+                      <strong>{lang.reviewer} : </strong>
+                      <span>{taskList[0]?.reviewer?.name}</span>
+                    </p>
+                  )}
+                </div>
               )}
               <div className="flex flex-1 flex-col w-[95%] mt-5 md:mt-20">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">

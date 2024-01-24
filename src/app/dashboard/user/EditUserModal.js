@@ -58,6 +58,10 @@ const EditUserModal = ({ groups, selectedRow }) => {
       name: "Reviewer",
       id: "REVIEWER",
     },
+    {
+      name: "Final Reviewer",
+      id: "FINAL_REVIEWER",
+    },
   ];
 
   return (
