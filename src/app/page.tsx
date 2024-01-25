@@ -55,6 +55,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
         </div>
       ) : (userDetail?.role === "REVIEWER" ||
           userDetail?.role === "FINAL_REVIEWER") &&
+        userTasks &&
         userTasks?.length === 0 ? (
         <>
           <div className="mt-10 p-5 text-xl font-semibold text-center">

@@ -4,6 +4,7 @@ import { useContext } from "react";
 import LanguageToggle from "./LanguageToggle";
 import { BsCheckLg, BsTrash } from "react-icons/bs";
 import { getTaskWithRevertedState } from "@/model/task";
+import Link from "next/link";
 
 const Sidebar = ({
   children,
@@ -146,6 +147,15 @@ const Sidebar = ({
             <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
               <h3 className="uppercase font-bold mb-2">{lang.language}</h3>
               <LanguageToggle />
+            </section>
+            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
+              <Link
+                href={`/dashboard/?session=${userDetail?.email}`}
+                type="button"
+                className="btn btn-accent btn-wide"
+              >
+                Dashboard
+              </Link>
             </section>
             <section className="px-5 pb-5 mb-5 border-b border-b-[#384451] overflow-y-auto flex-1">
               <h3 className="uppercase font-bold pb-2 top-0 sticky bg-[#54606e]">
