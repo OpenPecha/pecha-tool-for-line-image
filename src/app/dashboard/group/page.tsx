@@ -5,7 +5,11 @@ import { redirect } from "next/navigation";
 import { getUserDetails } from "@/model/action";
 export const dynamic = "force-dynamic";
 
-const Group = async ({ searchParams }) => {
+const Group = async ({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) => {
   let { session } = searchParams;
   if (!session) return redirect("/");
   let user = await getUserDetails(session);
