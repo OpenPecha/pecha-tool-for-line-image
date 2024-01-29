@@ -7,8 +7,7 @@ import AddUserModal from "./AddUserModal";
 import { deleteUser } from "@/model/user";
 import EditUserModal from "./EditUserModal";
 
-const UserDashboard = ({ users, groups, user }) => {
-  const { email, role } = user;
+const UserDashboard = ({ users, groups }) => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const handleRemoveUser = async (user) => {
@@ -33,15 +32,13 @@ const UserDashboard = ({ users, groups, user }) => {
 
   return (
     <>
-      {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
-        <div className="my-10 flex justify-center">
-          <DashboardBtn
-            label="Create"
-            icon={<AiOutlinePlus />}
-            onClick={() => window.add_modal.showModal()}
-          />
-        </div>
-      )}
+      <div className="my-10 flex justify-center">
+        <DashboardBtn
+          label="Create"
+          icon={<AiOutlinePlus />}
+          onClick={() => window.add_modal.showModal()}
+        />
+      </div>
       <div className="flex justify-center items-center my-10">
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-11/12 md:w-4/5 max-h-[80vh]">
           <table className="table">
@@ -53,9 +50,7 @@ const UserDashboard = ({ users, groups, user }) => {
                 <th className="px-6 py-3">Name</th>
                 <th className="px-6 py-3">Email</th>
                 <th className="px-6 py-3">Role</th>
-                {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
-                  <th className="px-6 py-3">Action</th>
-                )}
+                <th className="px-6 py-3">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -69,24 +64,22 @@ const UserDashboard = ({ users, groups, user }) => {
                   <td className="px-6 py-4">{user.name}</td>
                   <td className="px-6 py-4">{user.email}</td>
                   <td className="px-6 py-4">{user.role}</td>
-                  {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
-                    <td className="flex items-center px-6 py-4 space-x-3">
-                      <a
-                        href="#"
-                        className="font-medium text-info hover:underline"
-                        onClick={() => handleEditUser(user)}
-                      >
-                        Edit
-                      </a>
-                      <a
-                        href="#"
-                        className="font-medium text-error hover:underline"
-                        onClick={() => handleRemoveUser(user)}
-                      >
-                        Remove
-                      </a>
-                    </td>
-                  )}
+                  <td className="flex items-center px-6 py-4 space-x-3">
+                    <a
+                      href="#"
+                      className="font-medium text-info hover:underline"
+                      onClick={() => handleEditUser(user)}
+                    >
+                      Edit
+                    </a>
+                    <a
+                      href="#"
+                      className="font-medium text-error hover:underline"
+                      onClick={() => handleRemoveUser(user)}
+                    >
+                      Remove
+                    </a>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -22,9 +22,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
     }
   }
 
-  const routes = [
-    { name: "Dashboard", path: `/dashboard/?session=${userDetail?.email}` },
-  ];
+  const routes = [{ name: "Dashboard", path: "/dashboard" }];
 
   return (
     <div className="flex flex-col justify-center items-center overflow-y-auto">
@@ -58,7 +56,7 @@ export default async function Home({ searchParams }: { searchParams: any }) {
           userHistory={userHistory}
         />
       )}
-      <RightSidebar>
+    <RightSidebar>
         <iframe
           className="w-full h-full"
           src="https://docs.google.com/spreadsheets/d/e/2PACX-1vT5gDbwko0iKrR46GjJgsmMgGQXc6EiC9xBugl8BvV66pPz-czBeyO1DfVsti0jg-EJqTZ7dSUCu_qC/pubhtml?gid=991898896&amp;single=true&amp;widget=true&amp;headers=false"

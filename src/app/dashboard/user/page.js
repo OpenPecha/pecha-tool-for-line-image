@@ -5,17 +5,13 @@ import { getAllGroup } from "@/model/group";
 import { getUserDetails } from "@/model/action";
 export const dynamic = "force-dynamic";
 
-const User = async ({ searchParams }) => {
-  let { session } = searchParams;
-  if (!session) return redirect("/");
-  let user = await getUserDetails(session);
-  if (!user) return redirect("/");
+const User = async () => {
   const users = await getAllUser();
   const groups = await getAllGroup();
 
   return (
     <>
-      <UserDashboard users={users} groups={groups} user={user} />
+      <UserDashboard users={users} groups={groups} />
     </>
   );
 };

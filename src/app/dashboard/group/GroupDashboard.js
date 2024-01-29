@@ -7,9 +7,8 @@ import AddGroupModal from "./AddGroupModal";
 import EditGroupModal from "./EditGroupModal";
 import { deleteGroup } from "@/model/group";
 
-const GroupDashboard = ({ groupList, user }) => {
+const GroupDashboard = ({ groupList }) => {
   const [selectedRow, setSelectedRow] = useState(null);
-  const { email, role } = user;
   const handleRemoveGroup = async (row) => {
     const noUser = row._count.users;
     const noTask = row._count.tasks;
@@ -29,15 +28,13 @@ const GroupDashboard = ({ groupList, user }) => {
 
   return (
     <div>
-      {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
-        <div className="my-10 flex justify-center">
-          <DashboardBtn
-            label="Create"
-            icon={<AiOutlinePlus />}
-            onClick={() => window.add_modal.showModal()}
-          />
-        </div>
-      )}
+      <div className="my-10 flex justify-center">
+        <DashboardBtn
+          label="Create"
+          icon={<AiOutlinePlus />}
+          onClick={() => window.add_modal.showModal()}
+        />
+      </div>
       <div className="flex justify-center items-center my-10">
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg w-11/12 md:w-4/5 max-h-[80vh]">
           <table className="table">
@@ -47,9 +44,7 @@ const GroupDashboard = ({ groupList, user }) => {
                 <th className="px-6 py-3">Group name</th>
                 <th className="px-6 py-3">No. Users</th>
                 <th className="px-6 py-3">No. Tasks</th>
-                {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
-                  <th className="px-6 py-3">Action</th>
-                )}
+                <th className="px-6 py-3">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -59,24 +54,22 @@ const GroupDashboard = ({ groupList, user }) => {
                   <td className="px-6 py-4">{row.name}</td>
                   <td className="px-6 py-4">{row._count.users || 0}</td>
                   <td className="px-6 py-4">{row._count.tasks || 0}</td>
-                  {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
-                    <td className="flex items-center px-6 py-4 space-x-3">
-                      <a
-                        href="#"
-                        className="font-medium text-info hover:underline"
-                        onClick={() => handleEditGroup(row)}
-                      >
-                        Edit
-                      </a>
-                      <a
-                        href="#"
-                        className="font-medium text-error hover:underline"
-                        onClick={() => handleRemoveGroup(row)}
-                      >
-                        Remove
-                      </a>
-                    </td>
-                  )}
+                  <td className="flex items-center px-6 py-4 space-x-3">
+                    <a
+                      href="#"
+                      className="font-medium text-info hover:underline"
+                      onClick={() => handleEditGroup(row)}
+                    >
+                      Edit
+                    </a>
+                    <a
+                      href="#"
+                      className="font-medium text-error hover:underline"
+                      onClick={() => handleRemoveGroup(row)}
+                    >
+                      Remove
+                    </a>
+                  </td>
                 </tr>
               ))}
             </tbody>
