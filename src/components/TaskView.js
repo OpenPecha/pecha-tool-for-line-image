@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import Image from "next/image";
 
-const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
+const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
   const lang = language[languageSelected];
   const [taskList, setTaskList] = useState(tasks);
@@ -87,9 +87,6 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
       if (action === "submit") {
         getUserProgress();
       }
-      // if (action === "submit" || action === "trash") {
-      //   getUserHistory(userId);
-      // }
       if (getLastTaskIndex() != 0) {
         // remove the task updated from the task list
         setTaskList((prev) => prev.filter((task) => task.id !== id));
@@ -178,4 +175,4 @@ const AudioTranscript = ({ tasks, userDetail, language, userHistory }) => {
   );
 };
 
-export default AudioTranscript;
+export default TaskView;
