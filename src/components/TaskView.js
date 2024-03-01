@@ -146,7 +146,8 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                     className="object-contain"
                     priority={true}
                   />
-                  <input
+                  <textarea
+                    rows={3}
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}
                     className="font-OuChan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
