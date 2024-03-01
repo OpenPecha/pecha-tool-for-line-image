@@ -15,6 +15,7 @@ const config: Config = {
       },
       fontFamily: {
         Petsuk: ["Petsuk"],
+        OuChan: ["OuChan"],
       },
     },
   },
