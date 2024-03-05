@@ -274,7 +274,6 @@ export const updateTask = async (
     let endTime = Date.now();
     let timeDiff = endTime - startTime;
     duration = formatTime(timeDiff);
-    //console.log("duration", duration);
   }
   switch (role) {
     case "TRANSCRIBER":
@@ -348,6 +347,7 @@ export const updateTask = async (
               changeState.state === "submitted"
                 ? null
                 : transcript,
+            final_reviewed_at: new Date().toISOString(),
           },
         });
         if (updatedTask) {

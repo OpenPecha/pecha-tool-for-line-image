@@ -9,6 +9,11 @@
   src: url("/font/petsuk.ttf");
 }
 
+@font-face {
+  font-family: "OuChan";
+  src: url("/font/OuChan2.ttf");
+}
+
 body {
   font-family: "Lato", "Trebuchet MS", Roboto, Helvetica, Arial, sans-serif;
 }

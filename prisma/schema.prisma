@@ -51,6 +51,7 @@ model Task {
   created_at                DateTime? @default(now())
   submitted_at              DateTime?
   reviewed_at               DateTime?
+  final_reviewed_at         DateTime?
   duration                  String?
 }
 
