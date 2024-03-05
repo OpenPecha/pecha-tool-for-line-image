@@ -146,14 +146,24 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                     className="object-contain"
                     priority={true}
                   />
-                  <textarea
-                    rows={3}
-                    value={transcript || ""}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    className="font-OuChan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
-                    placeholder="Type here..."
-                    id="transcript"
-                  />
+                  {taskList[0]?.format === "line" ? (
+                    <input
+                      value={transcript || ""}
+                      onChange={(e) => setTranscript(e.target.value)}
+                      className="font-OuChan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
+                      placeholder="Type here..."
+                      id="transcript"
+                    />
+                  ) : (
+                    <textarea
+                      rows={6}
+                      value={transcript || ""}
+                      onChange={(e) => setTranscript(e.target.value)}
+                      className="font-OuChan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
+                      placeholder="Type here..."
+                      id="transcript"
+                    />
+                  )}
                 </div>
               </div>
               <ActionButtons

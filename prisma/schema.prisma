@@ -31,6 +31,11 @@ enum State {
   finalised
 }
 
+enum Format {
+  line
+  page
+}
+
 model Task {
   id                        String    @id
   group_id                  Int
@@ -53,6 +58,7 @@ model Task {
   reviewed_at               DateTime?
   final_reviewed_at         DateTime?
   duration                  String?
+  format                    Format    @default(line)
 }
 
 model User {
