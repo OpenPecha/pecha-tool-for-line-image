@@ -25,7 +25,6 @@ export const getUserDetails = async (email) => {
         group: true,
       },
     });
-    console.log("userData", userData);
     // Return early if no user data is found
     if (!userData) {
       return null;
@@ -34,7 +33,7 @@ export const getUserDetails = async (email) => {
     // Return the user data
     return userData;
   } catch (error) {
-    // console.error("Failed to retrieve user details:", error);
+    console.error("Failed to retrieve user details:", error);
     throw new Error("Error fetching user details.");
   }
 };
@@ -82,51 +81,54 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
     },
   };
 
-  const { state, taskField, include } = roleParams[role] || {};
+  const { state, taskField, include } = roleParams[role];
 
   if (!state || !taskField) {
-    throw new Error(`Invalid role: ${role}`);
+    throw new Error(`Invalid role provided: ${role}`);
   }
 
   try {
-    const assignedTasks = await prisma.task.findMany({
-      where: {
-        group_id: groupId,
-        state,
-        [taskField]: userId,
-      },
+    let tasks = await prisma.task.findMany({
+      where: { group_id: groupId, state, [taskField]: userId },
       include,
       orderBy: { id: "asc" },
     });
 
-    if (assignedTasks && assignedTasks.length > 0) return assignedTasks;
-
-    // Assign tasks if no tasks are currently assigned
-    const unassignedTasks = await prisma.task.findMany({
-      where: {
-        group_id: groupId,
-        state,
-        [taskField]: null,
-      },
-      orderBy: { id: "asc" },
-      take: ASSIGN_TASKS,
-    });
-
-    if (unassignedTasks && unassignedTasks.length > 0) {
-      await prisma.task.updateMany({
-        where: { id: { in: unassignedTasks.map((task) => task.id) } },
-        data: { [taskField]: userId },
-      });
-      return unassignedTasks;
+    if (tasks.length === 0) {
+      tasks = await assignUnassignedTasks(groupId, state, taskField, userId);
     }
 
-    return [];
+    return tasks;
   } catch (error) {
-    console.error(`Error while handling tasks for ${role}:`, error);
+    console.error(
+      `Failed to retrieve or assign tasks for role ${role}: ${error.message}`
+    );
     throw new Error(
-      `Error while getting or assigning tasks for ${role}. Please try another.`
+      `Failed to retrieve or assign tasks for role ${role}: ${error.message}`
     );
   }
+};
+
+export const assignUnassignedTasks = async (
+  groupId,
+  state,
+  taskField,
+  userId
+) => {
+  const unassignedTasks = await prisma.task.findMany({
+    where: { group_id: groupId, state, [taskField]: null },
+    orderBy: { id: "asc" },
+    take: ASSIGN_TASKS,
+  });
+
+  if (unassignedTasks.length > 0) {
+    await prisma.task.updateMany({
+      where: { id: { in: unassignedTasks.map((task) => task.id) } },
+      data: { [taskField]: userId },
+    });
+  }
+
+  return unassignedTasks;
 };
 
 // get all the history of a user based on userId
@@ -154,41 +156,37 @@ export const getUserHistory = async (userId) => {
       },
       take: MAX_HISTORY,
     });
-    revalidatePath("/");
     return userHistory;
   } catch (error) {
-    // console.error("Error getting user history:", error);
+    console.error("Error getting user history:", error);
     throw new Error("An error occurred while fetching the user history.");
   }
 };
 
-// to change the state of task based on user action (state machine)
+// Task state transitions based on roles and actions
+const taskStateTransitions = {
+  TRANSCRIBER: {
+    submit: "submitted",
+    trash: "trashed",
+    default: "transcribing",
+  },
+  REVIEWER: {
+    submit: "accepted",
+    reject: "transcribing",
+    default: "submitted",
+  },
+  FINAL_REVIEWER: {
+    submit: "finalised",
+    reject: "submitted",
+    default: "accepted",
+  },
+};
+
+// Function to change the state of a task based on user action
 export const changeTaskState = (task, role, action) => {
-  switch (role) {
-    case "TRANSCRIBER":
-      return action === "submit"
-        ? { ...task, state: "submitted" }
-        : action === "trash"
-        ? { ...task, state: "trashed" }
-        : { ...task, state: "transcribing" };
-      break;
-    case "REVIEWER":
-      return action === "submit"
-        ? { ...task, state: "accepted" }
-        : action === "reject"
-        ? { ...task, state: "transcribing" }
-        : { ...task, state: "submitted" };
-      break;
-    case "FINAL_REVIEWER":
-      return action === "submit"
-        ? { ...task, state: "finalised" }
-        : action === "reject"
-        ? { ...task, state: "submitted" }
-        : { ...task, state: "accepted" };
-      break;
-    default:
-      break;
-  }
+  const newState =
+    taskStateTransitions[role]?.[action] || taskStateTransitions[role]?.default;
+  return { ...task, state: newState };
 };
 
 // update the takes based on user action
@@ -200,126 +198,70 @@ export const updateTask = async (
   role,
   currentTime
 ) => {
-  //console.log("update task", action, id, transcript, task, role, currentTime);
-  const changeState = await changeTaskState(task, role, action);
+  const changedTask = changeTaskState(task, role, action);
   let duration = null;
-  if (changeState.state === "submitted" || changeState.state === "accepted") {
-    // convert iso date to timestamp
-    let startTime = Date.parse(currentTime);
-    let endTime = Date.now();
-    let timeDiff = endTime - startTime;
+
+  if (["submitted", "accepted"].includes(changedTask.state)) {
+    const startTime = Date.parse(currentTime);
+    const endTime = Date.now();
+    const timeDiff = endTime - startTime;
     duration = formatTime(timeDiff);
-    //console.log("duration", duration);
   }
+
+  // Initialize data to update with common fields
+  const dataToUpdate = {
+    state: changedTask.state,
+  };
+
+  // Add role-specific fields
   switch (role) {
     case "TRANSCRIBER":
-      try {
-        const updatedTask = await prisma.task.update({
-          where: {
-            id,
-          },
-          data: {
-            state: changeState.state,
-            transcript: changeState.state === "trashed" ? null : transcript,
-            reviewed_transcript: null,
-            submitted_at: new Date().toISOString(),
-            duration: duration,
-          },
-        });
-        if (updatedTask) {
-          const msg = await taskToastMsg(action);
-          revalidatePath("/");
-          return { msg, updatedTask };
-        } else {
-          return {
-            error: "Error updating task",
-          };
-        }
-      } catch (error) {
-        //console.log("Error updating TRANSCRIBER task", error);
-      }
+      dataToUpdate.transcript =
+        changedTask.state === "trashed" ? null : transcript;
+      dataToUpdate.submitted_at = new Date().toISOString();
+      dataToUpdate.duration = duration;
       break;
     case "REVIEWER":
-      try {
-        const updatedTask = await prisma.task.update({
-          where: {
-            id,
-          },
-          data: {
-            state: changeState.state,
-            // when reviewer reject the task, set transcript as incoming transcript and other action keep it same
-
-            reviewed_transcript:
-              changeState.state === "trashed" ||
-              changeState.state === "transcribing"
-                ? null
-                : transcript,
-            reviewed_at: new Date().toISOString(),
-          },
-        });
-        if (updatedTask) {
-          const msg = await taskToastMsg(action);
-          revalidatePath("/");
-          return { msg, updatedTask };
-        } else {
-          return {
-            error: "Error updating task",
-          };
-        }
-      } catch (error) {
-        //console.log("Error updating REVIEWER task", error);
-      }
+      dataToUpdate.reviewed_transcript =
+        changedTask.state === "accepted" ? transcript : null;
+      dataToUpdate.reviewed_at = new Date().toISOString();
       break;
     case "FINAL_REVIEWER":
-      try {
-        const updatedTask = await prisma.task.update({
-          where: {
-            id,
-          },
-          data: {
-            state: changeState.state,
-            final_reviewed_transcript:
-              changeState.state === "trashed" ||
-              changeState.state === "submitted"
-                ? null
-                : transcript,
-          },
-        });
-        if (updatedTask) {
-          const msg = await taskToastMsg(action);
-          revalidatePath("/");
-          return { msg, updatedTask };
-        } else {
-          return {
-            error: "Error updating task",
-          };
-        }
-      } catch (error) {
-        //console.log("Error updating FINAL REVIEWER task", error);
-      }
-    default:
+      dataToUpdate.final_reviewed_transcript =
+        changedTask.state === "finalised" ? transcript : null;
+      dataToUpdate.finalised_reviewed_at = new Date().toISOString();
       break;
+    default:
+      // Optionally handle invalid roles or do nothing
+      console.error(`Invalid role: ${role}`);
+  }
+
+  try {
+    const updatedTask = await prisma.task.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    const msg = await taskToastMsg(action);
+
+    // Assuming revalidatePath is a function to refresh or redirect the page
+    revalidatePath("/");
+    return { msg, updatedTask };
+  } catch (error) {
+    console.error(`Error updating ${role} task:`, error);
+    return { error: "Error updating task" };
   }
 };
 
+// Function to generate toast messages based on action
 export const taskToastMsg = async (action) => {
-  switch (action) {
-    case "submit":
-      return {
-        success: "Task is submitted successfully",
-      };
-      break;
-    case "trash":
-      return {
-        success: "Task is trashed successfully",
-      };
-      break;
-    case "reject":
-      return {
-        success: "Task is rejected successfully",
-      };
-      break;
-    default:
-      break;
-  }
+  const actionSuccessMessages = {
+    submit: "Task is submitted successfully",
+    trash: "Task is trashed successfully",
+    reject: "Task is rejected successfully",
+  };
+
+  return {
+    success: actionSuccessMessages[action] || "Action performed successfully",
+  };
 };

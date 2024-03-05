@@ -3,6 +3,7 @@
 import prisma from "@/service/db";
 import { revalidatePath } from "next/cache";
 
+// Fetches all groups with a count of their tasks and users
 export const getAllGroup = async () => {
   try {
     const allGroup = await prisma.group.findMany({
@@ -17,11 +18,12 @@ export const getAllGroup = async () => {
     });
     return allGroup;
   } catch (error) {
-    // console.error("Error getting all group:", error);
-    throw new Error(error);
+    console.error("Error getting all group:", error);
+    throw new Error("Failed to retrieve groups.");
   }
 };
 
+// Creates a new group with the given name from formData
 export const createGroup = async (formData) => {
   const groupName = formData.get("name");
   try {
@@ -33,11 +35,12 @@ export const createGroup = async (formData) => {
     revalidatePath("/dashboard/group");
     return newGroup;
   } catch (error) {
-    //console.log("Error creating a group", error);
-    throw new Error(error);
+    console.error("Error creating a group", error);
+    throw new Error("Failed to create a new group.");
   }
 };
 
+// Deletes a group by its ID
 export const deleteGroup = async (id) => {
   try {
     const group = await prisma.group.delete({
@@ -48,8 +51,8 @@ export const deleteGroup = async (id) => {
     revalidatePath("/dashboard/group");
     return group;
   } catch (error) {
-    //console.log("Error deleting a group", error);
-    throw new Error(error);
+    console.error("Error deleting a group", error);
+    throw new Error("Failed to delete the group.");
   }
 };
 
@@ -67,7 +70,7 @@ export const editGroup = async (id, formData) => {
     revalidatePath("/dashboard/group");
     return group;
   } catch (error) {
-    //console.log("Error updating a group", error);
-    throw new Error(error);
+    console.error("Error updating a group", error);
+    throw new Error("Failed to update the group.");
   }
 };

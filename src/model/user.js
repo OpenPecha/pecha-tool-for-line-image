@@ -30,58 +30,63 @@ export const getAllUser = async () => {
 export const createUser = async (formData) => {
   const name = formData.get("name");
   const email = formData.get("email");
-  const groupId = formData.get("group_id");
+  const groupId = parseInt(formData.get("group_id"));
   const role = formData.get("role");
   try {
-    // check if username  and email already exists
-    const userByName = await prisma.user.findUnique({
-      where: {
-        name: name,
-      },
-    });
-
-    const userByEmail = await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
-
-    if (userByName && userByEmail) {
-      return {
-        error: "User already exists with the same username and email",
-      };
-    } else if (userByName) {
-      return {
-        error: "User already exists with the same username",
-      };
-    } else if (userByEmail) {
-      return {
-        error: "User already exists with the same email",
-      };
+    if (await checkUserExists(name, email)) {
+      return { error: "User already exists with the same username or email" };
     }
     // If no matching user was found, you can proceed with user creating new user
     const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        group_id: parseInt(groupId),
-        role,
-      },
+      data: { name, email, group_id: groupId, role },
     });
     revalidatePath("/dashboard/user");
-    // if new user is created, send msg to client side that user is created
-    if (newUser) {
-      return {
-        success: "User created successfully",
-      };
-    } else {
-      return {
-        error: "Error creating user",
-      };
-    }
+    return { success: "User created successfully" };
   } catch (error) {
-    //console.log("Error adding a user", error);
-    throw new Error(error);
+    console.error("Error creating a user", error);
+    throw new Error("Failed to create user.");
+  }
+};
+
+// Abstracting the duplicate user check into a reusable function
+async function checkUserExists(name, email, excludeUserId = null) {
+  let userQuery = {
+    OR: [{ name }, { email }],
+  };
+
+  if (excludeUserId) {
+    userQuery.AND = { NOT: { id: excludeUserId } };
+  }
+
+  const existingUsers = await prisma.user.findMany({
+    where: userQuery,
+    select: { id: true }, // Only fetch the id to check existence
+  });
+
+  return existingUsers.length > 0;
+}
+
+export const editUser = async (id, formData) => {
+  const userId = parseInt(id);
+  const name = formData.get("name");
+  const email = formData.get("email");
+  const groupId = parseInt(formData.get("group_id"));
+  const role = formData.get("role");
+
+  try {
+    if (await checkUserExists(name, email, userId)) {
+      return { error: "Another user exists with the same username or email" };
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { name, email, group_id: groupId, role },
+    });
+    revalidatePath("/dashboard/user");
+    return { success: "User updated successfully" };
+  } catch (error) {
+    console.error("Error updating a user details", error);
+    throw new Error("Failed to update user.");
   }
 };
 
@@ -95,89 +100,19 @@ export const deleteUser = async (id) => {
     revalidatePath("/dashboard/user");
     return user;
   } catch (error) {
-    //console.log("Error deleting a user", error);
-    throw new Error(error);
-  }
-};
-
-export const editUser = async (id, formData) => {
-  const name = formData.get("name");
-  const email = formData.get("email");
-  const groupId = formData.get("group_id");
-  const role = formData.get("role");
-  try {
-    // check if username  and email already exists
-    const userId = parseInt(id); // Ensure id is converted to an integer
-    const userByName = await prisma.user.findUnique({
-      where: {
-        name: name,
-        NOT: {
-          id: userId,
-        },
-      },
-    });
-
-    const userByEmail = await prisma.user.findUnique({
-      where: {
-        email: email,
-        NOT: {
-          id: userId,
-        },
-      },
-    });
-
-    if (userByName && userByEmail) {
-      return {
-        error: "User already exists with the same username and email",
-      };
-    } else if (userByName) {
-      return {
-        error: "User already exists with the same username",
-      };
-    } else if (userByEmail) {
-      return {
-        error: "User already exists with the same email",
-      };
-    }
-    const updatedUser = await prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        name,
-        email,
-        group_id: parseInt(groupId),
-        role,
-      },
-    });
-    revalidatePath("/dashboard/user");
-    // if user data is edited , send msg to client side that user is created
-    if (updatedUser) {
-      return {
-        success: "User edited successfully",
-      };
-    } else {
-      return {
-        error: "Error editing user",
-      };
-    }
-  } catch (error) {
-    //console.log("Error updating a user details", error);
-    throw new Error(error);
+    console.error("Error deleting a user", error);
+    throw new Error("Failed to delete user.");
   }
 };
 
 export const getUsersByGroup = async (groupId) => {
   try {
     const users = await prisma.user.findMany({
-      where: {
-        group_id: parseInt(groupId),
-        role: "TRANSCRIBER",
-      },
+      where: { group_id: parseInt(groupId), role: "TRANSCRIBER" },
     });
     return users;
   } catch (error) {
-    // console.error("Error getting users by group:", error);
-    throw new Error(error);
+    console.error("Error getting users by group:", error);
+    throw new Error("Failed to retrieve users by group.");
   }
 };

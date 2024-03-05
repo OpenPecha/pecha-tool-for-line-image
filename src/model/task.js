@@ -15,8 +15,8 @@ export const getAllTask = async (limit, skip) => {
     });
     return tasks;
   } catch (error) {
-    // console.error("Error getting all the tasks:", error);
-    throw new Error(error);
+    console.error("Error getting all the tasks:", error);
+    throw new Error("Failed to retrieve tasks.");
   }
 };
 
@@ -26,8 +26,8 @@ export const getTotalTaskCount = async () => {
     const totalTask = await prisma.task.count({});
     return totalTask;
   } catch (error) {
-    // console.error("Error fetching the count of lists:", error);
-    throw new Error(error);
+    console.error("Error fetching the count of lists:", error);
+    throw new Error("Failed to retrieve the count of tasks.");
   }
 };
 
@@ -76,100 +76,64 @@ export async function createTasksFromCSV(formData) {
 }
 
 export const getCompletedTaskCount = async (id, role) => {
+  const roleConditions = {
+    TRANSCRIBER: ["submitted", "accepted"],
+    REVIEWER: ["accepted", "finalised"],
+    FINAL_REVIEWER: ["finalised"],
+  };
+
+  const stateConditions = roleConditions[role] || [];
+  if (stateConditions.length === 0) {
+    console.error(`Invalid role: ${role}`);
+    throw new Error(`Invalid role provided: ${role}`);
+  }
+
   try {
-    switch (role) {
-      case "TRANSCRIBER":
-        try {
-          const completedTaskCount = await prisma.task.count({
-            where: {
-              transcriber_id: parseInt(id),
-              state: { in: ["submitted", "accepted"] },
-            },
-          });
-          return completedTaskCount;
-          break;
-        } catch (error) {
-          throw new Error(error);
-        }
-      case "REVIEWER":
-        try {
-          const completedTaskCount = await prisma.task.count({
-            where: {
-              reviewer_id: parseInt(id),
-              state: { in: ["accepted", "finalised"] },
-            },
-          });
-          return completedTaskCount;
-          break;
-        } catch (error) {
-          throw new Error(error);
-        }
-      case "FINAL_REVIEWER":
-        try {
-          const completedTaskCount = await prisma.task.count({
-            where: {
-              final_reviewer_id: parseInt(id),
-              state: { in: ["finalised"] },
-            },
-          });
-          return completedTaskCount;
-          break;
-        } catch (error) {
-          throw new Error(error);
-        }
-      default:
-        break;
-    }
+    const completedTaskCount = await prisma.task.count({
+      where: {
+        [`${role.toLowerCase()}_id`]: parseInt(id),
+        state: { in: stateConditions },
+      },
+    });
+    return completedTaskCount;
   } catch (error) {
-    throw new Error(error);
+    console.error(
+      `Error fetching completed task count for role ${role}:`,
+      error
+    );
+    throw new Error(`Failed to fetch completed task count for role ${role}.`);
   }
 };
 
 // get user progress based on the role, user id and group id
 export const UserProgressStats = async (id, role, groupId) => {
-  let completedTaskCount = 0;
-  let totalTaskCount = 0;
-  let totalTaskPassed = 0;
   try {
-    completedTaskCount = await getCompletedTaskCount(id, role);
-    totalTaskCount = await prisma.task.count({
+    const completedTaskCount = await getCompletedTaskCount(id, role);
+    const totalTaskCount = await prisma.task.count({
       where: {
-        OR: [
-          {
-            group_id: parseInt(groupId),
-            transcriber_id: parseInt(id),
-          },
-          {
-            group_id: parseInt(groupId),
-            reviewer_id: parseInt(id),
-          },
-          {
-            group_id: parseInt(groupId),
-            final_reviewer_id: parseInt(id),
-          },
-        ],
+        group_id: parseInt(groupId),
+        [`${role.toLowerCase()}_id`]: parseInt(id),
       },
     });
-    totalTaskPassed = await prisma.task.count({
+    // Assuming totalTaskPassed is meant to count tasks that have moved beyond the initial state for both TRANSCRIBER and REVIEWER roles
+    const totalTaskPassed = await prisma.task.count({
       where: {
-        OR: [
-          {
-            group_id: parseInt(groupId),
-            transcriber_id: parseInt(id),
-            state: { in: ["accepted", "finalised"] },
-          },
-          {
-            group_id: parseInt(groupId),
-            reviewer_id: parseInt(id),
-            state: { in: ["finalised"] },
-          },
-        ],
+        group_id: parseInt(groupId),
+        [`${role.toLowerCase()}_id`]: parseInt(id),
+        state:
+          role === "TRANSCRIBER"
+            ? { in: ["accepted", "finalised"] }
+            : "finalised",
       },
     });
-    //console.log("completedTaskCount", completedTaskCount, "totalTaskCount", totalTaskCount);
+
     return { completedTaskCount, totalTaskCount, totalTaskPassed };
   } catch (error) {
-    throw new Error(error);
+    console.error(
+      `Error fetching user progress stats for role ${role}:`,
+      error
+    );
+    throw new Error(`Failed to fetch user progress stats for role ${role}.`);
   }
 };
 
@@ -206,7 +170,7 @@ export const getTaskWithRevertedState = async (task, role) => {
     revalidatePath("/");
     return updatedTask;
   } catch (error) {
-    // console.error("Error getting reverted state task:", error);
+    console.error("Error getting reverted state task:", error);
     throw new Error(error);
   }
 };

@@ -2,7 +2,6 @@ import React from "react";
 import UserDashboard from "./UserDashboard";
 import { getAllUser } from "@/model/user";
 import { getAllGroup } from "@/model/group";
-import { getUserDetails } from "@/model/action";
 export const dynamic = "force-dynamic";
 
 const User = async () => {

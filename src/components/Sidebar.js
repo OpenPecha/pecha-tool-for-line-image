@@ -63,17 +63,21 @@ const Sidebar = ({
             </header>
             <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
               <h3 className="uppercase font-bold mb-2">{lang.project}</h3>
-              <div className="flex text-right justify-between">
+              <div className="flex justify-between">
                 <label className="text-sm font-bold mb-2">{lang.user}</label>
                 <span className="text-right">{userDetail.name}</span>
               </div>
-              <div className="flex text-right justify-between">
+              <div className="flex justify-between">
                 <label className="text-sm font-bold mb-2">{lang.group}</label>
-                <span className=" text-right">{userDetail.group.name}</span>
+                <span className="text-right">{userDetail.group.name}</span>
               </div>
-              <div className="flex text-right justify-between">
-                <label className="text-sm font-bold mb-2">{lang.task}</label>
-                <span className=" text-right">{taskList[0]?.id}</span>
+              <div className="flex justify-between w-full">
+                <label className="text-sm font-bold mb-2 w-1/2">
+                  {lang.task}
+                </label>
+                <span className="overflow-scroll text-right">
+                  {taskList[0]?.id}
+                </span>
               </div>
             </section>
             <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
@@ -125,7 +129,7 @@ const Sidebar = ({
                       ? lang.final_reviewed
                       : ""}
                   </label>
-                  <span className=" text-right">{totalTaskPassed}</span>
+                  <span className="text-right">{totalTaskPassed}</span>
                 </div>
               )}
               <div
