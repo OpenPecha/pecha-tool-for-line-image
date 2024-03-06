@@ -6,20 +6,35 @@ import { $Enums } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 const ASSIGN_TASKS = 5;
-//get user detail if exist
+const MAX_HISTORY = 20;
+/**
+ * Retrieves user details by email from the database.
+ *
+ * @param {string} email - The email of the user to be fetched.
+ * @returns {Object|null} The user data object if found, otherwise null.
+ * @throws {Error} Throws an error if the database query fails.
+ */
 export const getUserDetails = async (email) => {
-  const userData = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-    include: {
-      group: true,
-    },
-  });
-  if (userData === null) {
-    return null;
+  try {
+    const userData = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+      include: {
+        group: true,
+      },
+    });
+    // Return early if no user data is found
+    if (!userData) {
+      return null;
+    }
+
+    // Return the user data
+    return userData;
+  } catch (error) {
+    console.error("Failed to retrieve user details:", error);
+    throw new Error("Error fetching user details.");
   }
-  return userData;
 };
 
 // get task based on username
@@ -39,159 +54,79 @@ export const getUserTask = async (email) => {
   return { userTasks, userData, userHistory };
 };
 
+/**
+ * Retrieves assigned tasks for a user based on their role or assigns more tasks if none are assigned.
+ *
+ * @param {number} groupId - The group ID to filter the tasks.
+ * @param {number} userId - The user ID to assign tasks to.
+ * @param {"TRANSCRIBER" | "REVIEWER" | "FINAL_REVIEWER"} role - The role of the user.
+ * @returns {Promise<Array>} An array of tasks.
+ * @throws {Error} Throws an error if unable to retrieve or assign tasks.
+ */
 export const getTasksOrAssignMore = async (groupId, userId, role) => {
-  switch (role) {
-    case "TRANSCRIBER":
-      // get transcriber assigned tasks
-      try {
-        const assignedTasks = await prisma.task.findMany({
-          where: {
-            group_id: groupId,
-            state: "transcribing",
-            transcriber_id: userId,
-          },
-          orderBy: {
-            id: "asc",
-          },
-        });
-        if (assignedTasks === null)
-          throw new Error("No task found for TRANSCRIBER!.");
-        if (assignedTasks.length > 0) return assignedTasks;
-        // assign some tasks for user when got no task to work on
-        let unassignedTasks = await prisma.task.findMany({
-          where: {
-            group_id: groupId,
-            state: "transcribing",
-            transcriber_id: null,
-          },
-          orderBy: {
-            id: "asc",
-          },
-          take: ASSIGN_TASKS,
-        });
-        if (unassignedTasks) {
-          await prisma.task.updateMany({
-            where: {
-              id: { in: unassignedTasks?.map((task) => task.id) },
-            },
-            data: {
-              transcriber_id: userId,
-            },
-          });
-          return unassignedTasks;
-        }
-        return [];
-      } catch (error) {
-        // console.log("error", error);
-        throw new Error(
-          "Error while getting assigned task for TRANSCRIBER! Please try another"
-        );
-      }
-      break;
-    case "REVIEWER":
-      // get reviwer assigned tasks
-      try {
-        const assignedTasks = await prisma.task.findMany({
-          where: {
-            group_id: groupId,
-            state: "submitted",
-            reviewer_id: userId,
-          },
-          include: {
-            transcriber: true,
-          },
-          orderBy: {
-            id: "asc",
-          },
-        });
-        if (assignedTasks === null) {
-          throw new Error("No task found for REVIEWER!.");
-        }
-        if (assignedTasks.length > 0) return assignedTasks;
-        // assign some tasks for user when got no task to work on
-        let unassignedTasks = await prisma.task.findMany({
-          where: {
-            group_id: groupId,
-            state: "submitted",
-            reviewer_id: null,
-          },
-          orderBy: {
-            id: "asc",
-          },
-          take: ASSIGN_TASKS,
-        });
-        if (unassignedTasks) {
-          await prisma.task.updateMany({
-            where: {
-              id: { in: unassignedTasks?.map((task) => task.id) },
-            },
-            data: {
-              reviewer_id: userId,
-            },
-          });
-          return unassignedTasks;
-        }
-        return [];
-      } catch (error) {
-        //console.log("error", error);
-        throw new Error(
-          "Error while getting assigned task for REVIEWER! Please try another"
-        );
-      }
-      break;
-    case "FINAL_REVIEWER":
-      // get final reviwer assigned tasks
-      try {
-        const assignedTasks = await prisma.task.findMany({
-          where: {
-            group_id: groupId,
-            state: "accepted",
-            final_reviewer_id: userId,
-          },
-          include: {
-            transcriber: true,
-            reviewer: true,
-          },
-          orderBy: {
-            id: "asc",
-          },
-        });
-        if (assignedTasks === null) {
-          throw new Error("No task found for FINAL REVIEWER!.");
-        }
-        if (assignedTasks.length > 0) return assignedTasks;
-        // assign some tasks for user when got no task to work on
-        let unassignedTasks = await prisma.task.findMany({
-          where: {
-            group_id: groupId,
-            state: "accepted",
-            final_reviewer_id: null,
-          },
-          orderBy: {
-            id: "asc",
-          },
-          take: ASSIGN_TASKS,
-        });
-        if (unassignedTasks) {
-          await prisma.task.updateMany({
-            where: {
-              id: { in: unassignedTasks?.map((task) => task.id) },
-            },
-            data: {
-              final_reviewer_id: userId,
-            },
-          });
-          return unassignedTasks;
-        }
-        return [];
-      } catch (error) {
-        //console.log("error", error);
-        throw new Error(
-          "Error while getting assigned task for FINAL REVIEWER! Please try another"
-        );
-      }
-      break;
+  // Define role-specific parameters
+  const roleParams = {
+    TRANSCRIBER: { state: "transcribing", taskField: "transcriber_id" },
+    REVIEWER: {
+      state: "submitted",
+      taskField: "reviewer_id",
+      include: { transcriber: true },
+    },
+    FINAL_REVIEWER: {
+      state: "accepted",
+      taskField: "final_reviewer_id",
+      include: { transcriber: true, reviewer: true },
+    },
+  };
+
+  const { state, taskField, include } = roleParams[role];
+
+  if (!state || !taskField) {
+    throw new Error(`Invalid role provided: ${role}`);
   }
+
+  try {
+    let tasks = await prisma.task.findMany({
+      where: { group_id: groupId, state, [taskField]: userId },
+      include,
+      orderBy: { id: "asc" },
+    });
+
+    if (tasks.length === 0) {
+      tasks = await assignUnassignedTasks(groupId, state, taskField, userId);
+    }
+
+    return tasks;
+  } catch (error) {
+    console.error(
+      `Failed to retrieve or assign tasks for role ${role}: ${error.message}`
+    );
+    throw new Error(
+      `Failed to retrieve or assign tasks for role ${role}: ${error.message}`
+    );
+  }
+};
+
+export const assignUnassignedTasks = async (
+  groupId,
+  state,
+  taskField,
+  userId
+) => {
+  const unassignedTasks = await prisma.task.findMany({
+    where: { group_id: groupId, state, [taskField]: null },
+    orderBy: { id: "asc" },
+    take: ASSIGN_TASKS,
+  });
+
+  if (unassignedTasks.length > 0) {
+    await prisma.task.updateMany({
+      where: { id: { in: unassignedTasks.map((task) => task.id) } },
+      data: { [taskField]: userId },
+    });
+  }
+
+  return unassignedTasks;
 };
 
 // get all the history of a user based on userId
@@ -217,43 +152,40 @@ export const getUserHistory = async (userId) => {
       orderBy: {
         id: "desc",
       },
-      take: 20,
+      take: MAX_HISTORY,
     });
     revalidatePath("/");
     return userHistory;
   } catch (error) {
-    //console.log("Error getting user history", error);
-    throw new Error(error);
+    console.error("Error getting user history:", error);
+    throw new Error("An error occurred while fetching the user history.");
   }
 };
 
-// to change the state of task based on user action (state machine)
+// Task state transitions based on roles and actions
+const taskStateTransitions = {
+  TRANSCRIBER: {
+    submit: "submitted",
+    trash: "trashed",
+    default: "transcribing",
+  },
+  REVIEWER: {
+    submit: "accepted",
+    reject: "transcribing",
+    default: "submitted",
+  },
+  FINAL_REVIEWER: {
+    submit: "finalised",
+    reject: "submitted",
+    default: "accepted",
+  },
+};
+
+// Function to change the state of a task based on user action
 export const changeTaskState = (task, role, action) => {
-  switch (role) {
-    case "TRANSCRIBER":
-      return action === "submit"
-        ? { ...task, state: "submitted" }
-        : action === "trash"
-        ? { ...task, state: "trashed" }
-        : { ...task, state: "transcribing" };
-      break;
-    case "REVIEWER":
-      return action === "submit"
-        ? { ...task, state: "accepted" }
-        : action === "reject"
-        ? { ...task, state: "transcribing" }
-        : { ...task, state: "submitted" };
-      break;
-    case "FINAL_REVIEWER":
-      return action === "submit"
-        ? { ...task, state: "finalised" }
-        : action === "reject"
-        ? { ...task, state: "submitted" }
-        : { ...task, state: "accepted" };
-      break;
-    default:
-      break;
-  }
+  const newState =
+    taskStateTransitions[role]?.[action] || taskStateTransitions[role]?.default;
+  return { ...task, state: newState };
 };
 
 // update the takes based on user action
@@ -265,126 +197,70 @@ export const updateTask = async (
   role,
   currentTime
 ) => {
-  //console.log("update task", action, id, transcript, task, role, currentTime);
-  const changeState = await changeTaskState(task, role, action);
+  const changedTask = changeTaskState(task, role, action);
   let duration = null;
-  if (changeState.state === "submitted" || changeState.state === "accepted") {
-    // convert iso date to timestamp
-    let startTime = Date.parse(currentTime);
-    let endTime = Date.now();
-    let timeDiff = endTime - startTime;
+
+  if (["submitted", "accepted"].includes(changedTask.state)) {
+    const startTime = Date.parse(currentTime);
+    const endTime = Date.now();
+    const timeDiff = endTime - startTime;
     duration = formatTime(timeDiff);
   }
+
+  // Initialize data to update with common fields
+  const dataToUpdate = {
+    state: changedTask.state,
+  };
+
+  // Add role-specific fields
   switch (role) {
     case "TRANSCRIBER":
-      try {
-        const updatedTask = await prisma.task.update({
-          where: {
-            id,
-          },
-          data: {
-            state: changeState.state,
-            transcript: changeState.state === "trashed" ? null : transcript,
-            reviewed_transcript: null,
-            submitted_at: new Date().toISOString(),
-            duration: duration,
-          },
-        });
-        if (updatedTask) {
-          const msg = await taskToastMsg(action);
-          revalidatePath("/");
-          return { msg, updatedTask };
-        } else {
-          return {
-            error: "Error updating task",
-          };
-        }
-      } catch (error) {
-        //console.log("Error updating TRANSCRIBER task", error);
-      }
+      dataToUpdate.transcript =
+        changedTask.state === "trashed" ? null : transcript;
+      dataToUpdate.submitted_at = new Date().toISOString();
+      dataToUpdate.duration = duration;
       break;
     case "REVIEWER":
-      try {
-        const updatedTask = await prisma.task.update({
-          where: {
-            id,
-          },
-          data: {
-            state: changeState.state,
-            // when reviewer reject the task, set transcript as incoming transcript and other action keep it same
-
-            reviewed_transcript:
-              changeState.state === "trashed" ||
-              changeState.state === "transcribing"
-                ? null
-                : transcript,
-            reviewed_at: new Date().toISOString(),
-          },
-        });
-        if (updatedTask) {
-          const msg = await taskToastMsg(action);
-          revalidatePath("/");
-          return { msg, updatedTask };
-        } else {
-          return {
-            error: "Error updating task",
-          };
-        }
-      } catch (error) {
-        //console.log("Error updating REVIEWER task", error);
-      }
+      dataToUpdate.reviewed_transcript =
+        changedTask.state === "accepted" ? transcript : null;
+      dataToUpdate.reviewed_at = new Date().toISOString();
       break;
     case "FINAL_REVIEWER":
-      try {
-        const updatedTask = await prisma.task.update({
-          where: {
-            id,
-          },
-          data: {
-            state: changeState.state,
-            final_reviewed_transcript:
-              changeState.state === "trashed" ||
-              changeState.state === "submitted"
-                ? null
-                : transcript,
-            final_reviewed_at: new Date().toISOString(),
-          },
-        });
-        if (updatedTask) {
-          const msg = await taskToastMsg(action);
-          revalidatePath("/");
-          return { msg, updatedTask };
-        } else {
-          return {
-            error: "Error updating task",
-          };
-        }
-      } catch (error) {
-        //console.log("Error updating FINAL REVIEWER task", error);
-      }
-    default:
+      dataToUpdate.final_reviewed_transcript =
+        changedTask.state === "finalised" ? transcript : null;
+      dataToUpdate.finalised_reviewed_at = new Date().toISOString();
       break;
+    default:
+      // Optionally handle invalid roles or do nothing
+      console.error(`Invalid role: ${role}`);
+  }
+
+  try {
+    const updatedTask = await prisma.task.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    const msg = await taskToastMsg(action);
+
+    // Assuming revalidatePath is a function to refresh or redirect the page
+    revalidatePath("/");
+    return { msg, updatedTask };
+  } catch (error) {
+    console.error(`Error updating ${role} task:`, error);
+    return { error: "Error updating task" };
   }
 };
 
+// Function to generate toast messages based on action
 export const taskToastMsg = async (action) => {
-  switch (action) {
-    case "submit":
-      return {
-        success: "Task is submitted successfully",
-      };
-      break;
-    case "trash":
-      return {
-        success: "Task is trashed successfully",
-      };
-      break;
-    case "reject":
-      return {
-        success: "Task is rejected successfully",
-      };
-      break;
-    default:
-      break;
-  }
+  const actionSuccessMessages = {
+    submit: "Task is submitted successfully",
+    trash: "Task is trashed successfully",
+    reject: "Task is rejected successfully",
+  };
+
+  return {
+    success: actionSuccessMessages[action] || "Action performed successfully",
+  };
 };

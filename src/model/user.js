@@ -22,8 +22,8 @@ export const getAllUser = async () => {
     });
     return users;
   } catch (error) {
-    console.error("Error getting all the user:", error);
-    throw new Error(error);
+    console.error("Failed to retrieve users:", error);
+    throw new Error("Failed to retrieve users.");
   }
 };
 
@@ -95,8 +95,8 @@ export const deleteUser = async (id) => {
     revalidatePath("/dashboard/user");
     return user;
   } catch (error) {
-    //console.log("Error deleting a user", error);
-    throw new Error(error);
+    console.log("Failed to delete the user:", error);
+    throw new Error("Failed to delete the user.");
   }
 };
 
@@ -162,8 +162,8 @@ export const editUser = async (id, formData) => {
       };
     }
   } catch (error) {
-    //console.log("Error updating a user details", error);
-    throw new Error(error);
+    console.log("Failed to update the user details:", error);
+    throw new Error("Failed to update the user details.");
   }
 };
 
@@ -177,7 +177,7 @@ export const getUsersByGroup = async (groupId) => {
     });
     return users;
   } catch (error) {
-    // console.error("Error getting users by group:", error);
-    throw new Error(error);
+    console.error("Failed to retrieve users by group:", error);
+    throw new Error("Failed to retrieve users by group.");
   }
 };
