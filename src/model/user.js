@@ -98,7 +98,7 @@ export const deleteUser = async (id) => {
       },
     });
     revalidatePath("/dashboard/user");
-    return user;
+    return { success: "User deleted successfully" };
   } catch (error) {
     console.error("Error deleting a user", error);
     throw new Error("Failed to delete user.");
@@ -114,5 +114,64 @@ export const getUsersByGroup = async (groupId) => {
   } catch (error) {
     console.error("Error getting users by group:", error);
     throw new Error("Failed to retrieve users by group.");
+  }
+};
+
+// when removed from the UI,
+//     IT should not delete the USER data from the DB but remove from the UI.
+// but
+//     It should check the USER's role
+//     and then check the state of the task as per USRER role
+//     if the task is not done according to the role then assign the role_id null
+//     so that it can be assigned to someone else from the same group.
+export const removeUser = async (user) => {
+  const { id: userId, role, name, email } = user;
+  // Check for associated tasks
+  const userConstraintCount = await prisma.task.count({
+    where: {
+      OR: [
+        { transcriber_id: userId },
+        { reviewer_id: userId },
+        { final_reviewer_id: userId },
+      ],
+    },
+  });
+  if (userConstraintCount === 0) {
+    return deleteUser(userId);
+  }
+
+  // use prisma transaction to delete the user and update the task
+  try {
+    const [upatedUser, upatedTask] = await prisma.$transaction([
+      prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          name: `removed_${name}`,
+          email: `removed_${email}`,
+        },
+      }),
+      prisma.task.updateMany({
+        // lowercase the role to match the column name in the task table
+        where: {
+          [`${role.toLowerCase()}_id`]: userId,
+          state:
+            role === "TRANSCRIBER"
+              ? "transcribing"
+              : role === "REVIEWER"
+              ? "submitted"
+              : "accepted",
+        },
+        data: {
+          [`${role.toLowerCase()}_id`]: null,
+        },
+      }),
+    ]);
+    revalidatePath("/dashboard/user");
+    return { success: "User removed successfully" };
+  } catch (error) {
+    console.error("Error removing a user", error);
+    throw new Error("Failed to remove user.");
   }
 };

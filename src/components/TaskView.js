@@ -117,7 +117,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
         userHistory={userHistory}
       >
         {/* Page content here */}
-        <div className="h-full w-full flex flex-col justify-center items-center">
+        <div className="w-full flex flex-col justify-center items-center">
           {isLoading ? (
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
           ) : taskList?.length ? (
@@ -136,14 +136,14 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                   )}
                 </div>
               )}
-              <div className="flex flex-1 flex-col w-[95%] mt-5 md:mt-20">
+              <div className="w-[95%] mt-5 md:mt-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <Image
                     src={taskList[0]?.url}
                     alt="image"
                     width={1500}
                     height={400}
-                    className="object-contain"
+                    className="object-contain max-h-[50vh]"
                     priority={true}
                   />
                   {taskList[0]?.format === "line" ? (
@@ -156,7 +156,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                     />
                   ) : (
                     <textarea
-                      rows={10}
+                      rows={7}
                       value={transcript || ""}
                       onChange={(e) => setTranscript(e.target.value)}
                       className="font-OuChan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
