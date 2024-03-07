@@ -17,7 +17,7 @@ const Sidebar = ({
 }) => {
   const { completedTaskCount, totalTaskCount, totalTaskPassed } = userTaskStats;
   const value = useContext(AppContext);
-  let { lang } = value;
+  let { lang, languageSelected } = value;
 
   const handleHistoryClick = async (task) => {
     // get the task from db with task state step down by 1
@@ -29,7 +29,11 @@ const Sidebar = ({
 
   return (
     <>
-      <div className="drawer lg:drawer-open">
+      <div
+        className={`drawer lg:drawer-open ${
+          languageSelected === "bo" && "font-OuChan text-lg"
+        }`}
+      >
         <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center">
           {/* Navbar */}
@@ -51,7 +55,7 @@ const Sidebar = ({
                 </svg>
               </label>
             </div>
-            <div className="flex-1 px-2 mx-2">Pecha STT Tool</div>
+            <div className="flex-1 px-2 mx-2">{lang.title}</div>
           </div>
           {children}
         </div>
