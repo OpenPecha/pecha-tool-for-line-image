@@ -1,10 +1,8 @@
 import React from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getUserDetails } from "@/model/action";
 
 const Dashboard = async () => {
-  let routes = ["group", "user", "task"];
+  let routes = ["group", "user"];
 
   return (
     <div className="h-screen flex flex-col sm:flex-row justify-center items-center space-y-5 space-x-0 sm:space-y-0 sm:space-x-5">

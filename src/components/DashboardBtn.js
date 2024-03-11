@@ -9,7 +9,7 @@ const DashboardBtn = ({ label, icon, onClick }) => {
       className="btn sm:btn-wide btn-accent text-base sm:text-lg rounded-md"
       onClick={onClick}
     >
-      <div className="flex whitespace-nowrap justify-center items-center space-x-2">
+      <div className="flex whitespace-nowrap justify-center items-center gap-2">
         <p>{label}</p>
         <div className="flex items-center w-8 h-8">{icon}</div>
       </div>
