@@ -228,7 +228,7 @@ export const updateTask = async (
     case "FINAL_REVIEWER":
       dataToUpdate.final_reviewed_transcript =
         changedTask.state === "finalised" ? transcript : null;
-      dataToUpdate.finalised_reviewed_at = new Date().toISOString();
+      dataToUpdate.final_reviewed_at = new Date().toISOString();
       break;
     default:
       // Optionally handle invalid roles or do nothing

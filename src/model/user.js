@@ -2,6 +2,16 @@
 
 import prisma from "@/service/db";
 import { revalidatePath } from "next/cache";
+import {
+  getFinalReviewerTaskCount,
+  getReviewerTaskCount,
+  getReviewerTaskList,
+  getTaskReviewedBasedOnSubmitted,
+  getTranscriberTaskList,
+  getUserSpecificTasksCount,
+} from "./task";
+
+const levenshtein = require("fast-levenshtein");
 
 export const getAllUser = async () => {
   try {
@@ -242,4 +252,210 @@ export const removeUser = async (user) => {
     console.error("Error removing a user", error);
     throw new Error("Failed to remove user.");
   }
+};
+
+export const generateUserReportByGroup = async (groupId, dates) => {
+  try {
+    const users = await getUsersByGroup(groupId);
+    // if user is not found, return empty array
+    if (!users) {
+      return [];
+    }
+    const usersStatistic = await Promise.all(
+      users.map((user) => generateUsersTaskReport(user, dates))
+    );
+    return usersStatistic;
+  } catch (error) {
+    console.error("Error generating transcriber report by group:", error);
+    throw new Error("Failed to generate transcriber report.");
+  }
+};
+
+export const generateUsersTaskReport = async (user, dates) => {
+  const { id: userId, name } = user;
+  const [submittedTaskCount, userTasks, reviewedTaskCount] = await Promise.all([
+    getUserSpecificTasksCount(userId, dates),
+    getTranscriberTaskList(userId, dates),
+    getTaskReviewedBasedOnSubmitted(userId, dates),
+  ]);
+
+  const transcriberObj = {
+    id: userId,
+    name,
+    noSubmitted: submittedTaskCount,
+    noReviewedBasedOnSubmitted: reviewedTaskCount?.length || 0,
+    noReviewed: 0,
+    syllableCount: 0,
+    noTranscriptCorrected: 0,
+    characterCount: 0,
+    cer: 0,
+    totalCer: 0,
+  };
+
+  const updatedTranscriberObj = await UserTaskReport(transcriberObj, userTasks);
+
+  return updatedTranscriberObj;
+};
+
+// get the task statistics - task reviewed, reviewed secs, syllable count
+export const UserTaskReport = (transcriberObj, userTasks) => {
+  const userTaskSummary = userTasks.reduce((acc, task) => {
+    if (["accepted", "finalised"].includes(task.state)) {
+      acc.noReviewed++;
+      const syllableCount = task.reviewed_transcript
+        ? splitIntoSyllables(task.reviewed_transcript).length
+        : 0;
+      acc.syllableCount += syllableCount;
+      acc.characterCount += task.transcript ? task.transcript.length : 0;
+      // Ensure both transcripts are available before calculating CER
+      if (task.transcript && task.reviewed_transcript) {
+        const cer = levenshtein.get(task.transcript, task.reviewed_transcript);
+        acc.totalCer += cer; // Add CER for each task to total
+      }
+    }
+    if (task.transcript !== task.reviewed_transcript) {
+      acc.noTranscriptCorrected++;
+    }
+    return acc;
+  }, transcriberObj);
+  return userTaskSummary;
+};
+
+export const splitIntoSyllables = (transcript) => {
+  // Split the text into syllables using regular expressions
+  const syllables = transcript.split(/[\\s་།]+/);
+  // Filter out empty syllables
+  const filteredSplit = syllables.filter((s) => s !== "");
+  return filteredSplit;
+};
+
+export const reviewerOfGroup = async (groupId) => {
+  try {
+    const reviewers = await prisma.user.findMany({
+      where: {
+        group_id: parseInt(groupId),
+        role: "REVIEWER",
+      },
+    });
+    return reviewers;
+  } catch (error) {
+    console.error("Error getting reviewers of group:", error);
+    throw new Error(error);
+  }
+};
+
+// for all the reviewers of a group retun the task statistics - task reviewed, task accepted, task finalised
+export const generateReviewerReportbyGroup = async (groupId, dates) => {
+  try {
+    const reviewers = await reviewerOfGroup(groupId);
+    const reviewersReport = await Promise.all(
+      reviewers.map((reviewer) => generateReviewerTaskReport(reviewer, dates))
+    );
+
+    return reviewersReport;
+  } catch (error) {
+    console.error("Error getting users by group:", error);
+    throw new Error(error);
+  }
+};
+
+export const generateReviewerTaskReport = async (reviewer, dates) => {
+  const { id, name } = reviewer;
+
+  const [reviewerStats, reviewerTasks] = await Promise.all([
+    getReviewerTaskCount(id, dates),
+    getReviewerTaskList(id, dates),
+  ]);
+
+  const reviewerObj = {
+    id,
+    name,
+    noReviewed: reviewerStats.noReviewed,
+    noAccepted: reviewerStats.noAccepted,
+    noFinalised: reviewerStats.noFinalised,
+    noReviewedTranscriptCorrected: 0,
+    cer: 0,
+    totalCer: 0,
+    characterCount: 0,
+  };
+
+  // const updatedReviwerObj = await getReviewerTaskCount(id, dates, reviewerObj);
+  const updatedReviewerObj = await moreReviewerStats(
+    reviewerObj,
+    reviewerTasks
+  );
+
+  return updatedReviewerObj;
+};
+
+export const moreReviewerStats = (reviewerObj, reviewerTasks) => {
+  const reviewerTaskSummary = reviewerTasks.reduce((acc, task) => {
+    if (task.reviewed_transcript && task.final_reviewed_transcript) {
+      if (task.reviewed_transcript !== task.final_reviewed_transcript) {
+        acc.noReviewedTranscriptCorrected++;
+      }
+      acc.characterCount += task.reviewed_transcript
+        ? task.reviewed_transcript.length
+        : 0;
+      const cer = levenshtein.get(
+        task.reviewed_transcript,
+        task.final_reviewed_transcript
+      );
+      acc.totalCer += cer; // Add CER for each task to total
+    }
+    return acc;
+  }, reviewerObj);
+  return reviewerTaskSummary;
+};
+
+// for all the final reviewers of a group retun the task statistics - task finalised, finalised mintues
+export const generateFinalReviewerReportbyGroup = async (groupId, dates) => {
+  try {
+    const finalReviewers = await finalReviewerOfGroup(groupId);
+    const usersReport = generateFinalReviewerTaskReport(finalReviewers, dates);
+    return usersReport;
+  } catch (error) {
+    console.error("Error getting users by group:", error);
+    throw new Error(error);
+  }
+};
+
+export const finalReviewerOfGroup = async (groupId) => {
+  try {
+    const finalReviewers = await prisma.user.findMany({
+      where: {
+        group_id: parseInt(groupId),
+        role: "FINAL_REVIEWER",
+      },
+    });
+    return finalReviewers;
+  } catch (error) {
+    console.error("Error getting final reviewers of group:", error);
+    throw new Error(error);
+  }
+};
+
+export const generateFinalReviewerTaskReport = async (
+  finalReviewers,
+  dates
+) => {
+  const finalReviewerList = [];
+
+  for (const finalReviewer of finalReviewers) {
+    const { id, name } = finalReviewer;
+
+    const finalReviewerObj = {
+      id,
+      name,
+      noFinalised: 0,
+    };
+
+    const updatedFinalReviwerObj = await getFinalReviewerTaskCount(
+      id,
+      dates,
+      finalReviewerObj
+    );
+    finalReviewerList.push(updatedFinalReviwerObj);
+  }
+  return finalReviewerList;
 };
