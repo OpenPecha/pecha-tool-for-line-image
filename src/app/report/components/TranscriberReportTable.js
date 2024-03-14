@@ -74,9 +74,7 @@ const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
         <tbody>
           {usersStatistic?.map((user) => (
             <tr className="dark:text-slate-50" key={user.id}>
-              <td>
-                <Link href={`/report/user/${user.id}`}>{user.name}</Link>
-              </td>
+              <td>{user.name}</td>
               <td>{user.noSubmitted}</td>
               <td>{user.noReviewed}</td>
               <td
