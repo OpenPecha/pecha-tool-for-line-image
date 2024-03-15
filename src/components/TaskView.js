@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import Image from "next/image";
+import TiffImageDisplayFromUrl from "@/components/TiffImageDisplayFromUrl";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -26,6 +27,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   function getLastTaskIndex() {
     return taskList.length != 0 ? taskList?.length - 1 : 0;
   }
+
   useEffect(() => {
     getUserProgress();
     // Assign a value to currentTimeRef.current
@@ -138,14 +140,18 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               )}
               <div className="flex flex-1 flex-col w-[95%] mt-5 md:mt-20">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
-                  <Image
-                    src={taskList[0]?.url}
-                    alt="image"
-                    width={1500}
-                    height={400}
-                    className="object-contain"
-                    priority={true}
-                  />
+                  {taskList[0]?.url?.includes(".tif") ? (
+                    <TiffImageDisplayFromUrl imageUrl={taskList[0]?.url} />
+                  ) : (
+                    <Image
+                      src={taskList[0]?.url}
+                      alt="image"
+                      width={1500}
+                      height={400}
+                      className="object-contain"
+                      priority={true}
+                    />
+                  )}
                   <input
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}

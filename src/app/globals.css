@@ -17,3 +17,9 @@
 body {
   font-family: "Lato", "Trebuchet MS", Roboto, Helvetica, Arial, sans-serif;
 }
+
+#tifImg>canvas {
+  width: 100% !important;
+  height: 150px;
+  object-fit: contain;
+}

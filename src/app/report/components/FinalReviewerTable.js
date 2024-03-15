@@ -15,7 +15,11 @@ const FinalReviewerTable = ({ finalReviewersStatistic }) => {
         <tbody>
           {finalReviewersStatistic?.map((finalReviewer) => (
             <tr key={finalReviewer.id}>
-              <td>{finalReviewer.name}</td>
+              <td>
+                <Link href={`/report/user/${finalReviewer.id}`}>
+                  {finalReviewer.name}
+                </Link>
+              </td>
               <td>{finalReviewer.noFinalised}</td>
             </tr>
           ))}

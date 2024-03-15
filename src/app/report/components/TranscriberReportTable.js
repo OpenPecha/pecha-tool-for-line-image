@@ -1,6 +1,5 @@
 import Link from "next/link";
 import React from "react";
-import { calculatePay } from "@/lib/calculatePay";
 import { calculatePercent } from "@/lib/calculatePercent";
 const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
   const glideGreentoRed = (num1, num2) => {
@@ -74,7 +73,9 @@ const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
         <tbody>
           {usersStatistic?.map((user) => (
             <tr className="dark:text-slate-50" key={user.id}>
-              <td>{user.name}</td>
+              <td>
+                <Link href={`/report/user/${user.id}`}>{user.name}</Link>
+              </td>
               <td>{user.noSubmitted}</td>
               <td>{user.noReviewed}</td>
               <td

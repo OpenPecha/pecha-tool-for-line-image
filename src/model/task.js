@@ -440,3 +440,54 @@ export const getFinalReviewerTaskCount = async (
     throw new Error("Failed to fetch final reviewer task counts.");
   }
 };
+
+export const getUserSpecificTasks = async (id, limit, skip, dates) => {
+  const { from: fromDate, to: toDate } = dates;
+
+  // Attempt to retrieve the user and their role
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+    select: { role: true },
+  });
+
+  if (!user) throw new Error(`User with ID ${id} not found.`);
+
+  let whereCondition = {
+    [`${user.role.toLowerCase()}_id`]: parseInt(id),
+    // Generic state filter applied to all roles. Adjust as necessary.
+    state:
+      user.role === "TRANSCRIBER"
+        ? { in: ["submitted", "accepted", "finalised"] }
+        : user.role === "REVIEWER"
+        ? { in: ["accepted", "finalised"] }
+        : { in: ["finalised"] },
+  };
+
+  // Adjust the `whereCondition` based on dates if provided
+  if (fromDate && toDate) {
+    const dateField =
+      user.role === "TRANSCRIBER"
+        ? "submitted_at"
+        : user.role === "REVIEWER"
+        ? "reviewed_at"
+        : "finalised_reviewed_at";
+    whereCondition[dateField] = {
+      gte: new Date(fromDate),
+      lte: new Date(toDate),
+    };
+  }
+
+  try {
+    // Fetch tasks based on the constructed whereCondition
+    const userTaskList = await prisma.task.findMany({
+      skip: skip,
+      take: limit,
+      where: whereCondition,
+    });
+
+    return userTaskList;
+  } catch (error) {
+    console.error(`Error fetching tasks for user with ID ${id}:`, error);
+    throw new Error(`Failed to fetch tasks for user with role ${user.role}.`);
+  }
+};

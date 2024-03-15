@@ -17,6 +17,7 @@ export default function RootLayout({
       <body>
         {children}
         <Toaster position="top-center" reverseOrder={false} />
+        <script src="/tiff.min.js" defer></script>
       </body>
     </html>
   );
