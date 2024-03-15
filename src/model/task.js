@@ -373,41 +373,6 @@ export const getReviewerTaskList = async (id, dates) => {
   }
 };
 
-export const getFinalReviewerTaskList = async (id, dates) => {
-  const { from: fromDate, to: toDate } = dates;
-  try {
-    if (fromDate && toDate) {
-      const filteredTasks = await prisma.task.findMany({
-        where: {
-          final_reviewer_id: id,
-          final_reviewed_at: {
-            gte: new Date(fromDate),
-            lte: new Date(toDate),
-          },
-        },
-        select: {
-          audio_duration: true,
-          state: true,
-        },
-      });
-      return filteredTasks;
-    } else {
-      const filteredTasks = await prisma.task.findMany({
-        where: {
-          final_reviewer_id: id,
-        },
-        select: {
-          audio_duration: true,
-          state: true,
-        },
-      });
-      return filteredTasks;
-    }
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
 export const getFinalReviewerTaskCount = async (
   id,
   dates,

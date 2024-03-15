@@ -22,7 +22,7 @@ const UserReportTable = ({ userTaskRecord }) => {
           <thead className="text-gray-700 bg-gray-50">
             <tr>
               <th className="pr-80">Transcript</th>
-              <th>Audio</th>
+              <th>Image</th>
               <th>State</th>
               <th>Submitted at</th>
               <th>Reviewed at</th>
