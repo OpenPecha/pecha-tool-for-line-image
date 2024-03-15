@@ -48,10 +48,10 @@ const UserReportTable = ({ userTaskRecord }) => {
                       {task.reviewed_transcript}
                     </div>
                   )}
-                  {task.final_transcript !== null && (
+                  {task.final_reviewed_transcript !== null && (
                     <div className="grid gap-2 mb-2">
                       <strong>Final:</strong>
-                      {task.final_transcript}
+                      {task.final_reviewed_transcript}
                     </div>
                   )}
                 </td>
