@@ -67,7 +67,8 @@ const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
             <th>Task Reviewed</th>
             <th>Reviewed %</th>
             <th>Task Corrected %</th>
-            <th>Character Error %</th>
+            <th>Character Error % (I/T)</th>
+            <th>Character Error % (T/R)</th>
           </tr>
         </thead>
         <tbody>
@@ -96,6 +97,17 @@ const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
                 )}`}
               >
                 {calculatePercent(user.noTranscriptCorrected, user.noReviewed)}
+              </td>
+              <td
+                className={`${glideGreentoRed(
+                  user.inferenceTotalCer,
+                  user.inferenceTotalCharacterCount
+                )}`}
+              >
+                {calculatePercent(
+                  user.inferenceTotalCer,
+                  user.inferenceTotalCharacterCount
+                )}
               </td>
               <td
                 className={`${glideGreentoRed(
@@ -136,6 +148,17 @@ const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
                     0
                   ),
                   usersStatistic?.reduce((a, b) => a + b.noReviewed, 0)
+                )}
+              </b>
+            </td>
+            <td>
+              <b>
+                {calculatePercent(
+                  usersStatistic?.reduce((a, b) => a + b.inferenceTotalCer, 0),
+                  usersStatistic?.reduce(
+                    (a, b) => a + b.inferenceTotalCharacterCount,
+                    0
+                  )
                 )}
               </b>
             </td>

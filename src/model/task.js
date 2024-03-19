@@ -233,6 +233,7 @@ export const getTranscriberTaskList = async (id, dates) => {
           },
         },
         select: {
+          inference_transcript: true,
           transcript: true,
           reviewed_transcript: true,
           state: true,
@@ -245,6 +246,7 @@ export const getTranscriberTaskList = async (id, dates) => {
           transcriber_id: id,
         },
         select: {
+          inference_transcript: true,
           transcript: true,
           reviewed_transcript: true,
           state: true,
@@ -422,7 +424,7 @@ export const getUserSpecificTasks = async (id, limit, skip, dates) => {
     // Generic state filter applied to all roles. Adjust as necessary.
     state:
       user.role === "TRANSCRIBER"
-        ? { in: ["submitted", "accepted", "finalised"] }
+        ? { in: ["submitted", "accepted", "finalised", "trashed"] }
         : user.role === "REVIEWER"
         ? { in: ["accepted", "finalised"] }
         : { in: ["finalised"] },

@@ -290,6 +290,8 @@ export const generateUsersTaskReport = async (user, dates) => {
     characterCount: 0,
     cer: 0,
     totalCer: 0,
+    inferenceTotalCer: 0,
+    inferenceTotalCharacterCount: 0,
   };
 
   const updatedTranscriberObj = await UserTaskReport(transcriberObj, userTasks);
@@ -300,6 +302,14 @@ export const generateUsersTaskReport = async (user, dates) => {
 // get the task statistics - task reviewed, reviewed secs, syllable count
 export const UserTaskReport = (transcriberObj, userTasks) => {
   const userTaskSummary = userTasks.reduce((acc, task) => {
+    // check if the inference transcript is not null
+    if (task.inference_transcript) {
+      acc.inferenceTotalCharacterCount += task.inference_transcript
+        ? task.inference_transcript.length
+        : 0;
+      const cer = levenshtein.get(task.inference_transcript, task.transcript);
+      acc.inferenceTotalCer += cer; // Add CER for each task to total
+    }
     if (["accepted", "finalised"].includes(task.state)) {
       acc.noReviewed++;
       const syllableCount = task.reviewed_transcript
