@@ -141,7 +141,7 @@ const Sidebar = ({
                 <span className=" text-right">{totalTaskCount}</span>
               </div>
             </section>
-            <section className="px-5 mb-2 border-b border-b-[#384451]">
+            <section className="flex gap-4 align-middle px-5 mb-2 border-b border-b-[#384451]">
               <h3 className="uppercase font-bold mb-2">{lang.language}</h3>
               <LanguageToggle />
             </section>

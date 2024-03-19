@@ -6,7 +6,7 @@ const Navbar = () => {
   let { languageSelected, setLanguageSelected } = value;
   return (
     <>
-      <label className="relative inline-flex items-center mb-5 cursor-pointer">
+      <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
           value=""

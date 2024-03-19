@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 const ASSIGN_TASKS = 5;
 const MAX_HISTORY = 20;
 /**
- * Retrieves user details by email from the database.
+ * Retrieves user details by email from the database
  *
  * @param {string} email - The email of the user to be fetched.
  * @returns {Object|null} The user data object if found, otherwise null.
@@ -50,7 +50,7 @@ export const getUserTask = async (email) => {
   // if user is found, get the task based on user role
   const { id: userId, group_id: groupId, role } = userData;
   userTasks = await getTasksOrAssignMore(groupId, userId, role);
-  const userHistory = await getUserHistory(userId);
+  const userHistory = await getUserHistory(userId, groupId);
   return { userTasks, userData, userHistory };
 };
 
@@ -130,7 +130,7 @@ export const assignUnassignedTasks = async (
 };
 
 // get all the history of a user based on userId
-export const getUserHistory = async (userId) => {
+export const getUserHistory = async (userId, groupId) => {
   try {
     const userHistory = await prisma.task.findMany({
       where: {
@@ -138,14 +138,17 @@ export const getUserHistory = async (userId) => {
           {
             transcriber_id: userId,
             state: { in: ["submitted", "trashed"] },
+            group_id: groupId,
           },
           {
             reviewer_id: userId,
             state: { in: ["accepted", "trashed"] },
+            group_id: groupId,
           },
           {
             final_reviewer_id: userId,
             state: { in: ["finalised", "trashed"] },
+            group_id: groupId,
           },
         ],
       },
