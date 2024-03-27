@@ -141,11 +141,11 @@ const Sidebar = ({
                 <span className=" text-right">{totalTaskCount}</span>
               </div>
             </section>
-            <section className="flex gap-4 align-middle px-5 mb-2 border-b border-b-[#384451]">
+            <section className="flex gap-4 align-middle px-5 py-2 border-b border-b-[#384451]">
               <h3 className="uppercase font-bold mb-2">{lang.language}</h3>
               <LanguageToggle />
             </section>
-            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
+            <section className="px-5 py-2 border-b border-b-[#384451]">
               <Link
                 href={`/dashboard/?session=${userDetail?.email}`}
                 type="button"
@@ -154,7 +154,7 @@ const Sidebar = ({
                 Dashboard
               </Link>
             </section>
-            <section className="px-5 pb-5 mb-2 border-b border-b-[#384451] overflow-y-auto flex-1">
+            <section className="px-5 py-3 border-b border-b-[#384451] overflow-y-auto flex-1">
               <h3 className="uppercase font-bold pb-2 top-0 sticky bg-[#54606e]">
                 {lang.history}
               </h3>
