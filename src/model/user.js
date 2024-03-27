@@ -318,9 +318,9 @@ export const UserTaskReport = (transcriberObj, userTasks) => {
         const cer = levenshtein.get(task.transcript, task.reviewed_transcript);
         acc.totalCer += cer; // Add CER for each task to total
       }
-    }
-    if (task.transcript !== task.reviewed_transcript) {
-      acc.noTranscriptCorrected++;
+      if (task.transcript !== task.reviewed_transcript) {
+        acc.noTranscriptCorrected++;
+      }
     }
     return acc;
   }, transcriberObj);
