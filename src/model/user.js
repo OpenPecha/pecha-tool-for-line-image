@@ -303,20 +303,16 @@ export const generateUsersTaskReport = async (user, dates) => {
 export const UserTaskReport = (transcriberObj, userTasks) => {
   const userTaskSummary = userTasks.reduce((acc, task) => {
     // check if the inference transcript is not null
-    if (task.inference_transcript) {
+    if (task.inference_transcript && task.transcript) {
       acc.inferenceTotalCharacterCount += task.inference_transcript
-        ? task.inference_transcript.length
+        ? task.inference_transcript?.length
         : 0;
       const cer = levenshtein.get(task.inference_transcript, task.transcript);
       acc.inferenceTotalCer += cer; // Add CER for each task to total
     }
     if (["accepted", "finalised"].includes(task.state)) {
       acc.noReviewed++;
-      const syllableCount = task.reviewed_transcript
-        ? splitIntoSyllables(task.reviewed_transcript).length
-        : 0;
-      acc.syllableCount += syllableCount;
-      acc.characterCount += task.transcript ? task.transcript.length : 0;
+      acc.characterCount += task.transcript ? task.transcript?.length : 0;
       // Ensure both transcripts are available before calculating CER
       if (task.transcript && task.reviewed_transcript) {
         const cer = levenshtein.get(task.transcript, task.reviewed_transcript);
@@ -329,14 +325,6 @@ export const UserTaskReport = (transcriberObj, userTasks) => {
     return acc;
   }, transcriberObj);
   return userTaskSummary;
-};
-
-export const splitIntoSyllables = (transcript) => {
-  // Split the text into syllables using regular expressions
-  const syllables = transcript.split(/[\\s་།]+/);
-  // Filter out empty syllables
-  const filteredSplit = syllables.filter((s) => s !== "");
-  return filteredSplit;
 };
 
 export const reviewerOfGroup = async (groupId) => {
