@@ -15,7 +15,7 @@ export const getAllTask = async (limit, skip) => {
     });
     return tasks;
   } catch (error) {
-    console.error("Error getting all the tasks:", error);
+    console.error("Failed to retrieve tasks:", error);
     throw new Error("Failed to retrieve tasks.");
   }
 };
@@ -26,7 +26,7 @@ export const getTotalTaskCount = async () => {
     const totalTask = await prisma.task.count({});
     return totalTask;
   } catch (error) {
-    console.error("Error fetching the count of lists:", error);
+    console.error("Failed to retrieve the count of tasks:", error);
     throw new Error("Failed to retrieve the count of tasks.");
   }
 };
@@ -97,11 +97,10 @@ export const getCompletedTaskCount = async (id, role) => {
     });
     return completedTaskCount;
   } catch (error) {
-    console.error(
-      `Error fetching completed task count for role ${role}:`,
-      error
+    console.error(`Failed to retrieve completed task count: ${error.message}`);
+    throw new Error(
+      `Failed to retrieve completed task count: ${error.message}`
     );
-    throw new Error(`Failed to fetch completed task count for role ${role}.`);
   }
 };
 
@@ -115,7 +114,7 @@ export const UserProgressStats = async (id, role, groupId) => {
         [`${role.toLowerCase()}_id`]: parseInt(id),
       },
     });
-    // Assuming totalTaskPassed is meant to count tasks that have moved beyond the initial state for both TRANSCRIBER and REVIEWER roles
+    // total task which are reviewed by reviewer and finalised by final reviewer
     const totalTaskPassed = await prisma.task.count({
       where: {
         group_id: parseInt(groupId),
@@ -126,11 +125,10 @@ export const UserProgressStats = async (id, role, groupId) => {
             : "finalised",
       },
     });
-
     return { completedTaskCount, totalTaskCount, totalTaskPassed };
   } catch (error) {
     console.error(
-      `Error fetching user progress stats for role ${role}:`,
+      `Failed to fetch user progress stats for role ${role}:`,
       error
     );
     throw new Error(`Failed to fetch user progress stats for role ${role}.`);
@@ -170,7 +168,292 @@ export const getTaskWithRevertedState = async (task, role) => {
     revalidatePath("/");
     return updatedTask;
   } catch (error) {
-    console.error("Error getting reverted state task:", error);
+    console.error("Failed to reverted the state of task:", error);
+    throw new Error("Failed to revert the state of the task.");
+  }
+};
+
+export const getUserSpecificTasksCount = async (id, dates) => {
+  const { from: fromDate, to: toDate } = dates;
+
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+    select: { role: true },
+  });
+
+  if (!user) throw new Error(`User with ID ${id} not found.`);
+
+  // Define the base condition for task counting based on the user's role
+  let baseWhereCondition = {
+    [`${user.role.toLowerCase()}_id`]: parseInt(id),
+    state:
+      user.role === "TRANSCRIBER"
+        ? { in: ["submitted", "accepted", "finalised"] }
+        : user.role === "REVIEWER"
+        ? { in: ["accepted", "finalised"] }
+        : { in: ["finalised"] }, // Defaults to FINAL_REVIEWER case
+  };
+
+  // Extend the base condition with date filters if both fromDate and toDate are provided
+  if (fromDate && toDate) {
+    const dateFieldName =
+      user.role === "TRANSCRIBER"
+        ? "submitted_at"
+        : user.role === "REVIEWER"
+        ? "reviewed_at"
+        : "final_reviewed_at"; // Applies to REVIEWER and FINAL_REVIEWER
+    baseWhereCondition[dateFieldName] = {
+      gte: new Date(fromDate),
+      lte: new Date(toDate),
+    };
+  }
+
+  try {
+    const userTaskCount = await prisma.task.count({
+      where: baseWhereCondition,
+    });
+    return userTaskCount;
+  } catch (error) {
+    console.error(`Error fetching tasks count for user with ID ${id}:`, error);
+    throw new Error("Failed to fetch user-specific tasks count.");
+  }
+};
+
+export const getTranscriberTaskList = async (id, dates) => {
+  const { from: fromDate, to: toDate } = dates;
+  try {
+    if (fromDate && toDate) {
+      const filteredTasks = await prisma.task.findMany({
+        where: {
+          transcriber_id: id,
+          reviewed_at: {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+          },
+        },
+        select: {
+          inference_transcript: true,
+          transcript: true,
+          reviewed_transcript: true,
+          state: true,
+        },
+      });
+      return filteredTasks;
+    } else {
+      const filteredTasks = await prisma.task.findMany({
+        where: {
+          transcriber_id: id,
+        },
+        select: {
+          inference_transcript: true,
+          transcript: true,
+          reviewed_transcript: true,
+          state: true,
+        },
+      });
+      return filteredTasks;
+    }
+  } catch (error) {
+    console.error("Error fetching transcriber task list:", error);
+    throw new Error("Failed to fetch transcriber task list.");
+  }
+};
+
+export const getTaskReviewedBasedOnSubmitted = async (id, dates) => {
+  const { from: fromDate, to: toDate } = dates;
+  let taskReviewedBasedOnSubmitted;
+  if (fromDate && toDate) {
+    taskReviewedBasedOnSubmitted = await prisma.task.findMany({
+      where: {
+        transcriber_id: parseInt(id),
+        state: { in: ["accepted", "finalised"] },
+        submitted_at: {
+          gte: new Date(fromDate).toISOString(),
+          lte: new Date(toDate).toISOString(),
+        },
+      },
+    });
+  } else {
+    taskReviewedBasedOnSubmitted = await prisma.task.findMany({
+      where: {
+        transcriber_id: parseInt(id),
+        state: { in: ["accepted", "finalised"] },
+      },
+    });
+  }
+  return taskReviewedBasedOnSubmitted;
+};
+
+export const getReviewerTaskCount = async (id, dates, reviewerObj) => {
+  const { from: fromDate, to: toDate } = dates;
+  const reviewerId = parseInt(id);
+
+  // Construct the base query condition
+  const baseWhere = {
+    reviewer_id: reviewerId,
+    reviewed_at:
+      fromDate && toDate
+        ? {
+            gte: new Date(fromDate).toISOString(),
+            lte: new Date(toDate).toISOString(),
+          }
+        : undefined,
+  };
+
+  try {
+    // Count all reviewed tasks (either accepted or finalised)
+    const reviewedStats = await prisma.task.aggregate({
+      where: {
+        ...baseWhere,
+        state: { in: ["accepted", "finalised"] },
+      },
+      _count: true,
+    });
+    const noReviewed = reviewedStats._count || 0;
+    // Count tasks in accepted state
+    const noAccepted = await prisma.task.count({
+      where: {
+        ...baseWhere,
+        state: "accepted",
+      },
+    });
+
+    // Count tasks in finalised state
+    const noFinalised = await prisma.task.count({
+      where: {
+        ...baseWhere,
+        state: "finalised",
+      },
+    });
+
+    return {
+      noReviewed,
+      noAccepted,
+      noFinalised,
+    };
+  } catch (error) {
+    console.error(`Error fetching reviewer task counts:`, error);
+    throw new Error(`Failed to fetch reviewer task counts. ${error.message}`);
+  }
+};
+
+export const getReviewerTaskList = async (id, dates) => {
+  const { from: fromDate, to: toDate } = dates;
+  try {
+    if (fromDate && toDate) {
+      const filteredTasks = await prisma.task.findMany({
+        where: {
+          reviewer_id: id,
+          reviewed_at: {
+            gte: new Date(fromDate),
+            lte: new Date(toDate),
+          },
+        },
+        select: {
+          state: true,
+          reviewed_transcript: true,
+          final_reviewed_transcript: true,
+        },
+      });
+      return filteredTasks;
+    } else {
+      const filteredTasks = await prisma.task.findMany({
+        where: {
+          reviewer_id: id,
+        },
+        select: {
+          state: true,
+          reviewed_transcript: true,
+          final_reviewed_transcript: true,
+        },
+      });
+      return filteredTasks;
+    }
+  } catch (error) {
     throw new Error(error);
+  }
+};
+
+export const getFinalReviewerTaskCount = async (
+  id,
+  dates,
+  finalReviewerObj
+) => {
+  const { from: fromDate, to: toDate } = dates;
+  try {
+    if (fromDate && toDate) {
+      finalReviewerObj.noFinalised = await prisma.task.count({
+        where: {
+          final_reviewer_id: parseInt(id),
+          state: "finalised",
+          final_reviewed_at: {
+            gte: new Date(fromDate).toISOString(),
+            lte: new Date(toDate).toISOString(),
+          },
+        },
+      });
+    } else {
+      finalReviewerObj.noFinalised = await prisma.task.count({
+        where: {
+          final_reviewer_id: parseInt(id),
+          state: "finalised",
+        },
+      });
+    }
+    return finalReviewerObj;
+  } catch (error) {
+    console.error(`Error fetching final reviewer task counts:`, error);
+    throw new Error("Failed to fetch final reviewer task counts.");
+  }
+};
+
+export const getUserSpecificTasks = async (id, limit, skip, dates) => {
+  const { from: fromDate, to: toDate } = dates;
+
+  // Attempt to retrieve the user and their role
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+    select: { role: true },
+  });
+
+  if (!user) throw new Error(`User with ID ${id} not found.`);
+
+  let whereCondition = {
+    [`${user.role.toLowerCase()}_id`]: parseInt(id),
+    // Generic state filter applied to all roles. Adjust as necessary.
+    state:
+      user.role === "TRANSCRIBER"
+        ? { in: ["submitted", "accepted", "finalised", "trashed"] }
+        : user.role === "REVIEWER"
+        ? { in: ["accepted", "finalised"] }
+        : { in: ["finalised"] },
+  };
+
+  // Adjust the `whereCondition` based on dates if provided
+  if (fromDate && toDate) {
+    const dateField =
+      user.role === "TRANSCRIBER"
+        ? "submitted_at"
+        : user.role === "REVIEWER"
+        ? "reviewed_at"
+        : "finalised_reviewed_at";
+    whereCondition[dateField] = {
+      gte: new Date(fromDate),
+      lte: new Date(toDate),
+    };
+  }
+
+  try {
+    // Fetch tasks based on the constructed whereCondition
+    const userTaskList = await prisma.task.findMany({
+      skip: skip,
+      take: limit,
+      where: whereCondition,
+    });
+
+    return userTaskList;
+  } catch (error) {
+    console.error(`Error fetching tasks for user with ID ${id}:`, error);
+    throw new Error(`Failed to fetch tasks for user with role ${user.role}.`);
   }
 };

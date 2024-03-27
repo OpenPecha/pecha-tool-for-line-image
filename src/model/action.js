@@ -2,12 +2,10 @@
 
 import { formatTime } from "@/lib/formatTime";
 import prisma from "@/service/db";
-import { $Enums } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 const ASSIGN_TASKS = 5;
-const MAX_HISTORY = 20; // Define as a constant
-
+const MAX_HISTORY = 20;
 /**
  * Retrieves user details by email from the database.
  *
@@ -51,8 +49,7 @@ export const getUserTask = async (email) => {
   // if user is found, get the task based on user role
   const { id: userId, group_id: groupId, role } = userData;
   userTasks = await getTasksOrAssignMore(groupId, userId, role);
-  const userHistory = await getUserHistory(userId);
-
+  const userHistory = await getUserHistory(userId, groupId);
   return { userTasks, userData, userHistory };
 };
 
@@ -132,7 +129,7 @@ export const assignUnassignedTasks = async (
 };
 
 // get all the history of a user based on userId
-export const getUserHistory = async (userId) => {
+export const getUserHistory = async (userId, groupId) => {
   try {
     const userHistory = await prisma.task.findMany({
       where: {
@@ -140,14 +137,17 @@ export const getUserHistory = async (userId) => {
           {
             transcriber_id: userId,
             state: { in: ["submitted", "trashed"] },
+            group_id: groupId,
           },
           {
             reviewer_id: userId,
             state: { in: ["accepted", "trashed"] },
+            group_id: groupId,
           },
           {
             final_reviewer_id: userId,
             state: { in: ["finalised", "trashed"] },
+            group_id: groupId,
           },
         ],
       },
@@ -156,6 +156,7 @@ export const getUserHistory = async (userId) => {
       },
       take: MAX_HISTORY,
     });
+    revalidatePath("/");
     return userHistory;
   } catch (error) {
     console.error("Error getting user history:", error);
