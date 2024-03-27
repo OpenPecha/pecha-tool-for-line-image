@@ -8,6 +8,8 @@ import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import Image from "next/image";
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -138,14 +140,16 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               )}
               <div className="w-[95%] mt-5 md:mt-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
-                  <Image
-                    src={taskList[0]?.url}
-                    alt="image"
-                    width={1500}
-                    height={400}
-                    className="object-contain max-h-[50vh]"
-                    priority={true}
-                  />
+                  <Zoom>
+                    <Image
+                      src={taskList[0]?.url}
+                      alt="image"
+                      width={1500}
+                      height={400}
+                      className="object-contain max-h-[50vh]"
+                      priority={true}
+                    />
+                  </Zoom>
                   {taskList[0]?.format === "line" ? (
                     <input
                       value={transcript || ""}
