@@ -8,8 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import Image from "next/image";
-import Zoom from "react-medium-image-zoom";
-import "react-medium-image-zoom/dist/styles.css";
+import { useZoomImageMove } from "@zoom-image/react";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -24,6 +23,8 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { id: userId, group_id: groupId, role } = userDetail;
   const currentTimeRef = useRef(null);
+  const containerRef = useRef(null);
+  const { createZoomImage } = useZoomImageMove();
 
   function getLastTaskIndex() {
     return taskList.length != 0 ? taskList?.length - 1 : 0;
@@ -58,6 +59,12 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
       setIsLoading(false);
     }
   }, [taskList]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      createZoomImage(containerRef.current);
+    }
+  }, [taskList[0]?.url]);
 
   const getUserProgress = async () => {
     const { completedTaskCount, totalTaskCount, totalTaskPassed } =
@@ -140,16 +147,16 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               )}
               <div className="w-[95%] mt-5 md:mt-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
-                  <Zoom>
-                    <Image
+                  <div
+                    className="relative w-full h-auto cursor-crosshair overflow-hidden"
+                    ref={containerRef}
+                  >
+                    <img
                       src={taskList[0]?.url}
                       alt="image"
-                      width={1500}
-                      height={400}
-                      className="object-contain max-h-[50vh]"
-                      priority={true}
+                      className="image object-cover"
                     />
-                  </Zoom>
+                  </div>
                   {taskList[0]?.format === "line" ? (
                     <input
                       value={transcript || ""}
