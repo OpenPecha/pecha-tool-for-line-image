@@ -262,7 +262,7 @@ export const getTranscriberTaskList = async (id, dates, groupId) => {
   }
 };
 
-export const getTaskReviewedBasedOnSubmitted = async (id, dates) => {
+export const getTaskReviewedBasedOnSubmitted = async (id, dates, groupId) => {
   const { from: fromDate, to: toDate } = dates;
   let taskReviewedBasedOnSubmitted;
   if (fromDate && toDate) {
