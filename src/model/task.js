@@ -173,7 +173,7 @@ export const getTaskWithRevertedState = async (task, role) => {
   }
 };
 
-export const getUserSpecificTasksCount = async (id, dates) => {
+export const getUserSpecificTasksCount = async (id, dates, groupId) => {
   const { from: fromDate, to: toDate } = dates;
 
   const user = await prisma.user.findUnique({
@@ -186,6 +186,7 @@ export const getUserSpecificTasksCount = async (id, dates) => {
   // Define the base condition for task counting based on the user's role
   let baseWhereCondition = {
     [`${user.role.toLowerCase()}_id`]: parseInt(id),
+    group_id: groupId,
     state:
       user.role === "TRANSCRIBER"
         ? { in: ["submitted", "accepted", "finalised"] }
@@ -219,7 +220,7 @@ export const getUserSpecificTasksCount = async (id, dates) => {
   }
 };
 
-export const getTranscriberTaskList = async (id, dates) => {
+export const getTranscriberTaskList = async (id, dates, groupId) => {
   const { from: fromDate, to: toDate } = dates;
   try {
     if (fromDate && toDate) {
@@ -230,6 +231,7 @@ export const getTranscriberTaskList = async (id, dates) => {
             gte: new Date(fromDate),
             lte: new Date(toDate),
           },
+          group_id: groupId,
         },
         select: {
           inference_transcript: true,
@@ -243,6 +245,7 @@ export const getTranscriberTaskList = async (id, dates) => {
       const filteredTasks = await prisma.task.findMany({
         where: {
           transcriber_id: id,
+          group_id: groupId,
         },
         select: {
           inference_transcript: true,
