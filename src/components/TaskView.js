@@ -1,7 +1,7 @@
 "use client";
 
 import { getTasksOrAssignMore, updateTask } from "@/model/action";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import ActionButtons from "./ActionButtons";
 import { UserProgressStats } from "@/model/task";
 import Sidebar from "@/components/Sidebar";
@@ -29,6 +29,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   function getLastTaskIndex() {
     return taskList.length != 0 ? taskList?.length - 1 : 0;
   }
+
   useEffect(() => {
     getUserProgress();
     // Assign a value to currentTimeRef.current
@@ -59,12 +60,6 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
       setIsLoading(false);
     }
   }, [taskList]);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      createZoomImage(containerRef.current);
-    }
-  }, [taskList[0]?.url]);
 
   const getUserProgress = async () => {
     const { completedTaskCount, totalTaskCount, totalTaskPassed } =
@@ -113,6 +108,12 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     }
   };
 
+  const handleImageLoad = useCallback(() => {
+    if (containerRef.current) {
+      createZoomImage(containerRef.current);
+    }
+  }, [taskList[0]?.url]);
+
   return (
     <AppContext.Provider
       value={{ languageSelected, setLanguageSelected, lang }}
@@ -151,10 +152,13 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                     className="relative w-full h-auto cursor-crosshair overflow-hidden"
                     ref={containerRef}
                   >
-                    <img
+                    <Image
                       src={taskList[0]?.url}
                       alt="image"
+                      width={1500}
+                      height={400}
                       className="image object-cover"
+                      onLoad={handleImageLoad}
                     />
                   </div>
                   {taskList[0]?.format === "line" ? (
