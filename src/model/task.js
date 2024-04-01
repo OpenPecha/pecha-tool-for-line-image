@@ -462,3 +462,49 @@ export const getUserSpecificTasks = async (id, limit, skip, dates) => {
     throw new Error(`Failed to fetch tasks for user with role ${user.role}.`);
   }
 };
+
+export const getUserCompletedTasksCount = async (id, dates) => {
+  const { from: fromDate, to: toDate } = dates;
+
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+    select: { role: true },
+  });
+
+  if (!user) throw new Error(`User with ID ${id} not found.`);
+
+  // Define the base condition for task counting based on the user's role
+  let baseWhereCondition = {
+    [`${user.role.toLowerCase()}_id`]: parseInt(id),
+    state:
+      user.role === "TRANSCRIBER"
+        ? { in: ["submitted", "accepted", "finalised"] }
+        : user.role === "REVIEWER"
+        ? { in: ["accepted", "finalised"] }
+        : { in: ["finalised"] }, // Defaults to FINAL_REVIEWER case
+  };
+
+  // Extend the base condition with date filters if both fromDate and toDate are provided
+  if (fromDate && toDate) {
+    const dateFieldName =
+      user.role === "TRANSCRIBER"
+        ? "submitted_at"
+        : user.role === "REVIEWER"
+        ? "reviewed_at"
+        : "final_reviewed_at"; // Applies to REVIEWER and FINAL_REVIEWER
+    baseWhereCondition[dateFieldName] = {
+      gte: new Date(fromDate),
+      lte: new Date(toDate),
+    };
+  }
+
+  try {
+    const userTaskCount = await prisma.task.count({
+      where: baseWhereCondition,
+    });
+    return userTaskCount;
+  } catch (error) {
+    console.error(`Error fetching tasks count for user with ID ${id}:`, error);
+    throw new Error("Failed to fetch user-specific tasks count.");
+  }
+};

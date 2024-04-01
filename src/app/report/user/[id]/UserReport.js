@@ -1,6 +1,10 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import { getUserSpecificTasks, getUserSpecificTasksCount } from "@/model/task";
+import {
+  getUserSpecificTasks,
+  getUserSpecificTasksCount,
+  getUserCompletedTasksCount,
+} from "@/model/task";
 import PaginationControls from "@/components/PaginationControls";
 import UserReportTable from "./UserReportTable";
 import Select from "@/components/Select";
@@ -41,7 +45,7 @@ const UserReport = ({ searchParams, id, users }) => {
           skip,
           dates
         );
-        const totalUserSpecificTasks = await getUserSpecificTasksCount(
+        const totalUserSpecificTasks = await getUserCompletedTasksCount(
           selectedOption,
           dates
         );
