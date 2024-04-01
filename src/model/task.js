@@ -186,7 +186,7 @@ export const getUserSpecificTasksCount = async (id, dates, groupId) => {
   // Define the base condition for task counting based on the user's role
   let baseWhereCondition = {
     [`${user.role.toLowerCase()}_id`]: parseInt(id),
-    group_id: groupId,
+    group_id: parseInt(groupId),
     state:
       user.role === "TRANSCRIBER"
         ? { in: ["submitted", "accepted", "finalised"] }
@@ -231,7 +231,7 @@ export const getTranscriberTaskList = async (id, dates, groupId) => {
             gte: new Date(fromDate),
             lte: new Date(toDate),
           },
-          group_id: groupId,
+          group_id: parseInt(groupId),
         },
         select: {
           inference_transcript: true,
@@ -245,7 +245,7 @@ export const getTranscriberTaskList = async (id, dates, groupId) => {
       const filteredTasks = await prisma.task.findMany({
         where: {
           transcriber_id: id,
-          group_id: groupId,
+          group_id: parseInt(groupId),
         },
         select: {
           inference_transcript: true,
@@ -274,6 +274,7 @@ export const getTaskReviewedBasedOnSubmitted = async (id, dates) => {
           gte: new Date(fromDate).toISOString(),
           lte: new Date(toDate).toISOString(),
         },
+        group_id: parseInt(groupId),
       },
     });
   } else {
@@ -281,6 +282,7 @@ export const getTaskReviewedBasedOnSubmitted = async (id, dates) => {
       where: {
         transcriber_id: parseInt(id),
         state: { in: ["accepted", "finalised"] },
+        group_id: parseInt(groupId),
       },
     });
   }
