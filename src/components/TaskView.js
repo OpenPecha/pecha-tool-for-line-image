@@ -137,7 +137,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                   )}
                 </div>
               )}
-              <div className="w-[90%] mt-5 md:mt-10">
+              <div className="w-[90%] my-5 md:my-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <DisplayImage task={taskList[0]} />
                   {taskList[0]?.format === "line" ? (
