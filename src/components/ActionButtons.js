@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import { BsCheckLg, BsXLg, BsTrash } from "react-icons/bs";
+import { BsCheckLg, BsXLg } from "react-icons/bs";
 import { useContext, useEffect } from "react";
 import AppContext from "./AppContext";
-
+import { AiOutlineStop } from "react-icons/ai";
 const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
   // a = 65 submit, x = 88 reject , s = 83 save, t = 84 trash
   const value = useContext(AppContext);
@@ -60,8 +60,8 @@ const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
           id="trash-button"
           bgColor="bg-[#b9b9b9]"
           tooltipText="Trash(Alt + t)"
-          icon={BsTrash}
-          text={lang.trash}
+          icon={AiOutlineStop}
+          text={lang.ignore}
           onClickAction={() =>
             updateTaskAndIndex("trash", transcript, tasks[0])
           }
@@ -83,7 +83,7 @@ const ButtonWithTooltip = ({
     <button
       id={id}
       type="button"
-      className={`focus:outline-none text-white ${bgColor} font-medium text-md w-32 md:w-36 h-full p-4 md:py-9`}
+      className={`focus:outline-none text-white ${bgColor} font-medium text-md w-32 h-full p-4 md:py-6`}
       onClick={onClickAction}
     >
       <div className="flex gap-2 flex-col items-center">

@@ -1,14 +1,13 @@
 "use client";
 
 import { getTasksOrAssignMore, updateTask } from "@/model/action";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ActionButtons from "./ActionButtons";
 import { UserProgressStats } from "@/model/task";
 import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
-import Image from "next/image";
-import { useZoomImageMove } from "@zoom-image/react";
+import DisplayImage from "@/components/DisplayImage";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -23,8 +22,6 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { id: userId, group_id: groupId, role } = userDetail;
   const currentTimeRef = useRef(null);
-  const containerRef = useRef(null);
-  const { createZoomImage } = useZoomImageMove();
 
   function getLastTaskIndex() {
     return taskList.length != 0 ? taskList?.length - 1 : 0;
@@ -108,14 +105,6 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     }
   };
 
-  const handleImageLoad = useCallback(() => {
-    if (containerRef.current) {
-      createZoomImage(containerRef.current, {
-        zoomFactor: 2,
-      });
-    }
-  }, [taskList[0]?.url]);
-
   return (
     <AppContext.Provider
       value={{ languageSelected, setLanguageSelected, lang }}
@@ -148,21 +137,9 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                   )}
                 </div>
               )}
-              <div className="w-[95%] mt-5 md:mt-10">
+              <div className="w-[90%] mt-5 md:mt-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
-                  <div
-                    className="relative w-full h-auto cursor-crosshair overflow-hidden"
-                    ref={containerRef}
-                  >
-                    <Image
-                      src={taskList[0]?.url}
-                      alt="image"
-                      width={1500}
-                      height={400}
-                      className="object-contain max-h-[50vh]"
-                      onLoad={handleImageLoad}
-                    />
-                  </div>
+                  <DisplayImage task={taskList[0]} />
                   {taskList[0]?.format === "line" ? (
                     <input
                       value={transcript || ""}

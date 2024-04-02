@@ -1,0 +1,35 @@
+import Image from "next/image";
+import React, { useRef, useCallback } from "react";
+import { useZoomImageMove } from "@zoom-image/react";
+
+function DisplayImage({ task }) {
+  const containerRef = useRef(null);
+  const { createZoomImage } = useZoomImageMove();
+
+  const url = task?.url;
+  const handleImageLoad = useCallback(() => {
+    if (containerRef.current) {
+      createZoomImage(containerRef.current, {
+        zoomFactor: 2,
+      });
+    }
+  }, [url]);
+
+  return (
+    <div
+      className="relative w-full h-auto cursor-crosshair overflow-hidden"
+      ref={containerRef}
+    >
+      <Image
+        src={url}
+        alt="image"
+        width={1500}
+        height={400}
+        className="object-contain max-h-[40vh]"
+        onLoad={handleImageLoad}
+      />
+    </div>
+  );
+}
+
+export default DisplayImage;
