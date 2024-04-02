@@ -33,7 +33,7 @@ const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
   };
 
   return (
-    <div className="fixed bottom-0 mt-4 flex gap-1 border shadow-sm p-2">
+    <div className="fixed bottom-0 flex gap-1">
       <ButtonWithTooltip
         id="submit-button"
         bgColor="bg-[#4fd364]"
@@ -83,7 +83,7 @@ const ButtonWithTooltip = ({
     <button
       id={id}
       type="button"
-      className={`focus:outline-none text-white ${bgColor} font-medium text-md w-32 h-full p-4 md:py-6`}
+      className={`focus:outline-none text-white ${bgColor} font-medium text-md w-24 h-full py-4`}
       onClick={onClickAction}
     >
       <div className="flex gap-2 flex-col items-center">
