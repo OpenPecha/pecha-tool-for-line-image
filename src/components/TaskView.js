@@ -7,8 +7,7 @@ import { UserProgressStats } from "@/model/task";
 import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
-import Image from "next/image";
-import TiffImageDisplayFromUrl from "@/components/TiffImageDisplayFromUrl";
+import DisplayImage from "@/components/DisplayImage";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -119,7 +118,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
         userHistory={userHistory}
       >
         {/* Page content here */}
-        <div className="h-full w-full flex flex-col justify-center items-center">
+        <div className="w-full flex flex-col justify-center items-center">
           {isLoading ? (
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
           ) : taskList?.length ? (
@@ -138,20 +137,9 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                   )}
                 </div>
               )}
-              <div className="flex flex-1 flex-col w-[95%] mt-5 md:mt-20">
+              <div className="w-[95%] mt-5 md:mt-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
-                  {taskList[0]?.url?.includes(".tif") ? (
-                    <TiffImageDisplayFromUrl imageUrl={taskList[0]?.url} />
-                  ) : (
-                    <Image
-                      src={taskList[0]?.url}
-                      alt="image"
-                      width={1500}
-                      height={400}
-                      className="object-contain"
-                      priority={true}
-                    />
-                  )}
+                  <DisplayImage url={taskList[0]?.url} />
                   <input
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}
