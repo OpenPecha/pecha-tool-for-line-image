@@ -33,7 +33,7 @@ const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
   };
 
   return (
-    <div className="fixed bottom-0 flex gap-1">
+    <div className="fixed bottom-0 md:left-[50vw] flex gap-1">
       <ButtonWithTooltip
         id="submit-button"
         bgColor="bg-[#4fd364]"

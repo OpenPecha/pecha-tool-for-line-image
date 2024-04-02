@@ -2,7 +2,7 @@ export default function BurgerIcon({ setShowSidebar }) {
   return (
     <svg
       onClick={() => setShowSidebar((prev) => !prev)}
-      className="fixed z-30 flex items-center cursor-pointer right-5 top-1/2"
+      className="fixed z-30 flex items-center cursor-pointer right-5 top-3/4"
       fill="#46b574"
       viewBox="0 0 100 80"
       width="40"
