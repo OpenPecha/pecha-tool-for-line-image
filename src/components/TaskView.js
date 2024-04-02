@@ -110,7 +110,9 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
 
   const handleImageLoad = useCallback(() => {
     if (containerRef.current) {
-      createZoomImage(containerRef.current);
+      createZoomImage(containerRef.current, {
+        zoomFactor: 2,
+      });
     }
   }, [taskList[0]?.url]);
 
@@ -157,7 +159,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                       alt="image"
                       width={1500}
                       height={400}
-                      className="image object-cover"
+                      className="object-contain max-h-[50vh]"
                       onLoad={handleImageLoad}
                     />
                   </div>
