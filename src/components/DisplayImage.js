@@ -17,15 +17,15 @@ function DisplayImage({ task }) {
 
   return (
     <div
-      className="relative w-full h-auto cursor-crosshair overflow-hidden"
+      className="relative w-[90%] h-auto cursor-crosshair overflow-hidden"
       ref={containerRef}
     >
       <Image
         src={url}
         alt="image"
-        width={1500}
+        width={1100}
         height={400}
-        className="object-cover max-h-[40vh]"
+        className="max-h-[50vh]"
         onLoad={handleImageLoad}
       />
     </div>
