@@ -63,13 +63,13 @@ const Sidebar = ({
           </div>
           {children}
         </div>
-        <div className="drawer-side">
+        <div className="drawer-side bg-[#54606e]">
           <label htmlFor="my-drawer-3" className="drawer-overlay"></label>
-          <div className="flex flex-col w-80 min-h-full h-full bg-[#54606e] text-white">
-            <header className="bg-[#384451] p-4 mb-5">
+          <div className="flex flex-col w-80 min-h-full h-full text-white mb-10">
+            <header className="bg-[#384451] py-2 px-4">
               <div className="text-lg">{lang.title}</div>
             </header>
-            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451] flex">
+            <section className="px-4 py-4 border-b border-b-[#384451] flex">
               <ActionButtons
                 updateTaskAndIndex={updateTaskAndIndex}
                 tasks={taskList}
@@ -83,7 +83,7 @@ const Sidebar = ({
                 ></iframe>
               </RightSidebar>
             </section>
-            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
+            <section className="px-4 py-4 border-b border-b-[#384451]">
               <h3 className="uppercase font-bold mb-2">{lang.project}</h3>
               <div className="flex justify-between">
                 <label className="text-sm font-bold mb-2">{lang.user}</label>
@@ -102,7 +102,7 @@ const Sidebar = ({
                 </span>
               </div>
             </section>
-            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
+            <section className="px-4 py-4 border-b border-b-[#384451]">
               <h3 className="uppercase font-bold mb-2">{lang.target}</h3>
               <div
                 className="tooltip tooltip-bottom w-full mt-2 mb-6"
@@ -170,11 +170,11 @@ const Sidebar = ({
                 <span className=" text-right">{totalTaskCount}</span>
               </div>
             </section>
-            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
+            <section className="px-4 py-3 border-b border-b-[#384451] flex gap-2">
               <h3 className="uppercase font-bold mb-2">{lang.language}</h3>
               <LanguageToggle />
             </section>
-            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
+            <section className="px-4 py-3 border-b border-b-[#384451]">
               <Link
                 href={`/dashboard/?session=${userDetail?.email}`}
                 type="button"
@@ -183,8 +183,8 @@ const Sidebar = ({
                 Dashboard
               </Link>
             </section>
-            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451] overflow-y-auto flex-1">
-              <h3 className="uppercase font-bold pb-2 top-0 sticky bg-[#54606e]">
+            <section className="px-4 py-3 border-b border-b-[#384451] overflow-y-auto flex-1">
+              <h3 className="uppercase font-bold pb-2 top-0 sticky">
                 {lang.history}
               </h3>
               {userHistory.map((task) => (
