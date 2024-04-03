@@ -8,12 +8,12 @@ export default function Sidebar({ children }) {
     <div className="relative">
       {!showSidebar && <BurgerIcon setShowSidebar={setShowSidebar} />}
       <div
-        className={`top-3/4 right-0 w-[90vw] h-[50vh] md:w-[35vw] bg-[#54606e] p-2 text-white fixed z-40  ease-in-out duration-300 ${
-          showSidebar ? "translate-x-0 " : "translate-x-full"
+        className={`right-0 w-full h-[50vh] bg-[#54606e] p-2 text-white fixed z-40  ease-in-out duration-300 ${
+          showSidebar ? "translate-x-0 " : "-translate-x-full"
         }`}
       >
         <button
-          className="absolute top-0 right-0 bg-black p-2 hover:bg-slate-700 z-50 flex items-center text-3xl text-white cursor-pointer"
+          className="absolute right-0 bg-black p-2 hover:bg-slate-700 z-50 flex items-center text-3xl text-white cursor-pointer"
           onClick={() => setShowSidebar((prev) => !prev)}
         >
           ❌

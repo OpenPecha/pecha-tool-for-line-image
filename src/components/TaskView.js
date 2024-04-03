@@ -116,6 +116,8 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
         role={role}
         setTaskList={setTaskList}
         userHistory={userHistory}
+        updateTaskAndIndex={updateTaskAndIndex}
+        transcript={transcript}
       >
         {/* Page content here */}
         <div className="w-full flex flex-col justify-center items-center">
@@ -160,12 +162,6 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                   )}
                 </div>
               </div>
-              <ActionButtons
-                updateTaskAndIndex={updateTaskAndIndex}
-                tasks={taskList}
-                transcript={transcript}
-                role={role}
-              />
             </>
           ) : (
             <div className="flex flex-col justify-center items-center mt-10 p-5">

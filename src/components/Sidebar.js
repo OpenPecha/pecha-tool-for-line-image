@@ -5,6 +5,8 @@ import LanguageToggle from "./LanguageToggle";
 import { BsCheckLg, BsTrash } from "react-icons/bs";
 import { getTaskWithRevertedState } from "@/model/task";
 import Link from "next/link";
+import ActionButtons from "./ActionButtons";
+import RightSidebar from "@/components/RightSidebar";
 
 const Sidebar = ({
   children,
@@ -14,6 +16,8 @@ const Sidebar = ({
   role,
   setTaskList,
   userHistory,
+  updateTaskAndIndex,
+  transcript,
 }) => {
   const { completedTaskCount, totalTaskCount, totalTaskPassed } = userTaskStats;
   const value = useContext(AppContext);
@@ -65,6 +69,20 @@ const Sidebar = ({
             <header className="bg-[#384451] p-4 mb-5">
               <div className="text-lg">{lang.title}</div>
             </header>
+            <section className="px-5 pb-5 mb-5 border-b border-b-[#384451] flex">
+              <ActionButtons
+                updateTaskAndIndex={updateTaskAndIndex}
+                tasks={taskList}
+                transcript={transcript}
+                role={role}
+              />
+              <RightSidebar>
+                <iframe
+                  className="w-full h-full"
+                  src="https://docs.google.com/spreadsheets/d/e/2PACX-1vT5gDbwko0iKrR46GjJgsmMgGQXc6EiC9xBugl8BvV66pPz-czBeyO1DfVsti0jg-EJqTZ7dSUCu_qC/pubhtml?gid=991898896&amp;single=true&amp;widget=true&amp;headers=false"
+                ></iframe>
+              </RightSidebar>
+            </section>
             <section className="px-5 pb-5 mb-5 border-b border-b-[#384451]">
               <h3 className="uppercase font-bold mb-2">{lang.project}</h3>
               <div className="flex justify-between">
