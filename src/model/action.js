@@ -145,9 +145,17 @@ export const getUserHistory = async (userId, groupId, role) => {
 
     const userHistory = await prisma.task.findMany({
       where: whereCondition,
-      orderBy: {
-        id: "desc",
-      },
+      orderBy: [
+        {
+          final_reviewed_at: "desc",
+        },
+        {
+          reviewed_at: "desc",
+        },
+        {
+          submitted_at: "desc",
+        },
+      ],
       take: MAX_HISTORY,
     });
     return userHistory;
