@@ -143,7 +143,9 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                   <input
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}
-                    className="font-Ouchan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
+                    className={`${
+                      groupId === 11 ? "font-Petsuk" : "font-Ouchan"
+                    } rounded-md p-4 border border-slate-400 w-full h-full text-xl`}
                     placeholder="Type here..."
                     id="transcript"
                   />
