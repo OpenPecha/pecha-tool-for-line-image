@@ -174,15 +174,17 @@ const Sidebar = ({
               <h3 className="uppercase font-bold mb-2">{lang.language}</h3>
               <LanguageToggle />
             </section>
-            <section className="px-4 py-3 border-b border-b-[#384451]">
-              <Link
-                href={`/dashboard/?session=${userDetail?.email}`}
-                type="button"
-                className="btn btn-accent btn-wide"
-              >
-                Dashboard
-              </Link>
-            </section>
+            {role === "FINAL_REVIEWER" && (
+              <section className="px-4 py-3 border-b border-b-[#384451]">
+                <Link
+                  href={`/dashboard/?session=${userDetail?.email}`}
+                  type="button"
+                  className="btn btn-accent btn-wide"
+                >
+                  Dashboard
+                </Link>
+              </section>
+            )}
             <section className="px-4 py-3 border-b border-b-[#384451] overflow-y-auto flex-1">
               <h3 className="uppercase font-bold pb-2 top-0 sticky">
                 {lang.history}
