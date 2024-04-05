@@ -28,7 +28,6 @@ export const getUserDetails = async (email) => {
     if (!userData) {
       return null;
     }
-
     // Return the user data
     return userData;
   } catch (error) {
@@ -113,20 +112,25 @@ export const assignUnassignedTasks = async (
   taskField,
   userId
 ) => {
-  const unassignedTasks = await prisma.task.findMany({
-    where: { group_id: groupId, state, [taskField]: null },
-    orderBy: { id: "asc" },
-    take: ASSIGN_TASKS,
-  });
-
-  if (unassignedTasks.length > 0) {
-    await prisma.task.updateMany({
-      where: { id: { in: unassignedTasks.map((task) => task.id) } },
-      data: { [taskField]: userId },
+  try {
+    const unassignedTasks = await prisma.task.findMany({
+      where: { group_id: groupId, state, [taskField]: null },
+      orderBy: { id: "asc" },
+      take: ASSIGN_TASKS,
     });
-  }
 
-  return unassignedTasks;
+    if (unassignedTasks.length > 0) {
+      await prisma.task.updateMany({
+        where: { id: { in: unassignedTasks.map((task) => task.id) } },
+        data: { [taskField]: userId },
+      });
+    }
+
+    return unassignedTasks;
+  } catch (error) {
+    console.error(`Failed to retrieve or assign tasks : ${error.message}`);
+    throw new Error(`Failed to retrieve or assign tasks : ${error.message}`);
+  }
 };
 
 // get all the history of a user based on userId

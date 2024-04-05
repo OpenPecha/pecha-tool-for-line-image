@@ -20,17 +20,6 @@ export const getAllTask = async (limit, skip) => {
   }
 };
 
-//get the total count of tasks
-export const getTotalTaskCount = async () => {
-  try {
-    const totalTask = await prisma.task.count({});
-    return totalTask;
-  } catch (error) {
-    console.error("Failed to retrieve the count of tasks:", error);
-    throw new Error("Failed to retrieve the count of tasks.");
-  }
-};
-
 export async function createTasksFromCSV(formData) {
   let tasksToCreate = [];
   try {
@@ -75,9 +64,9 @@ export async function createTasksFromCSV(formData) {
   }
 }
 
-export const getCompletedTaskCount = async (id, role) => {
+export const getCompletedTaskCount = async (id, role, groupId) => {
   const roleConditions = {
-    TRANSCRIBER: ["submitted", "accepted"],
+    TRANSCRIBER: ["submitted", "accepted", "finalised"],
     REVIEWER: ["accepted", "finalised"],
     FINAL_REVIEWER: ["finalised"],
   };
@@ -93,6 +82,7 @@ export const getCompletedTaskCount = async (id, role) => {
       where: {
         [`${role.toLowerCase()}_id`]: parseInt(id),
         state: { in: stateConditions },
+        group_id: parseInt(groupId),
       },
     });
     return completedTaskCount;
@@ -107,7 +97,7 @@ export const getCompletedTaskCount = async (id, role) => {
 // get user progress based on the role, user id and group id
 export const UserProgressStats = async (id, role, groupId) => {
   try {
-    const completedTaskCount = await getCompletedTaskCount(id, role);
+    const completedTaskCount = await getCompletedTaskCount(id, role, groupId);
     const totalTaskCount = await prisma.task.count({
       where: {
         group_id: parseInt(groupId),
@@ -161,8 +151,12 @@ export const getTaskWithRevertedState = async (task, role) => {
         state: newState,
       },
       include: {
-        transcriber: true,
-        reviewer: true,
+        transcriber: {
+          select: { name: true },
+        },
+        reviewer: {
+          select: { name: true },
+        },
       },
     });
     revalidatePath("/");
@@ -437,7 +431,7 @@ export const getUserSpecificTasks = async (id, limit, skip, dates) => {
         ? "submitted_at"
         : user.role === "REVIEWER"
         ? "reviewed_at"
-        : "finalised_reviewed_at";
+        : "final_reviewed_at";
     whereCondition[dateField] = {
       gte: new Date(fromDate),
       lte: new Date(toDate),
