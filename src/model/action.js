@@ -49,7 +49,7 @@ export const getUserTask = async (email) => {
   // if user is found, get the task based on user role
   const { id: userId, group_id: groupId, role } = userData;
   userTasks = await getTasksOrAssignMore(groupId, userId, role);
-  const userHistory = await getUserHistory(userId, groupId);
+  const userHistory = await getUserHistory(userId, groupId, role);
   return { userTasks, userData, userHistory };
 };
 
@@ -129,38 +129,39 @@ export const assignUnassignedTasks = async (
 };
 
 // get all the history of a user based on userId
-export const getUserHistory = async (userId, groupId) => {
+export const getUserHistory = async (userId, groupId, role) => {
   try {
+    let whereCondition = {
+      [`${role.toLowerCase()}_id`]: parseInt(userId),
+      state:
+        role === "TRANSCRIBER"
+          ? { in: ["submitted", "trashed"] }
+          : role === "REVIEWER"
+          ? "accepted"
+          : "finalised",
+      group_id: parseInt(groupId),
+    };
+
     const userHistory = await prisma.task.findMany({
-      where: {
-        OR: [
-          {
-            transcriber_id: userId,
-            state: { in: ["submitted", "trashed"] },
-            group_id: groupId,
-          },
-          {
-            reviewer_id: userId,
-            state: { in: ["accepted", "trashed"] },
-            group_id: groupId,
-          },
-          {
-            final_reviewer_id: userId,
-            state: { in: ["finalised", "trashed"] },
-            group_id: groupId,
-          },
-        ],
-      },
-      orderBy: {
-        id: "desc",
-      },
+      where: whereCondition,
+      orderBy: [
+        {
+          final_reviewed_at: "desc",
+        },
+        {
+          reviewed_at: "desc",
+        },
+        {
+          submitted_at: "desc",
+        },
+      ],
       take: MAX_HISTORY,
     });
     revalidatePath("/");
     return userHistory;
   } catch (error) {
-    console.error("Error getting user history:", error);
-    throw new Error("An error occurred while fetching the user history.");
+    console.error("Failed to retrieve user history:", error);
+    throw new Error("Failed fetching user history.");
   }
 };
 
