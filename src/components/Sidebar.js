@@ -2,11 +2,12 @@ import React from "react";
 import AppContext from "./AppContext";
 import { useContext } from "react";
 import LanguageToggle from "./LanguageToggle";
-import { BsCheckLg, BsTrash } from "react-icons/bs";
+import { BsCheckLg } from "react-icons/bs";
 import { getTaskWithRevertedState } from "@/model/task";
 import Link from "next/link";
 import ActionButtons from "./ActionButtons";
 import RightSidebar from "@/components/RightSidebar";
+import { AiOutlineStop } from "react-icons/ai";
 
 const Sidebar = ({
   children,
@@ -210,7 +211,7 @@ const Sidebar = ({
                   >
                     {(task.state === "submitted" ||
                       task.state === "accepted") && <BsCheckLg size="1rem" />}
-                    {task.state === "trashed" && <BsTrash size="1rem" />}
+                    {task.state === "trashed" && <AiOutlineStop size="1rem" />}
                   </div>
                 </div>
               ))}
