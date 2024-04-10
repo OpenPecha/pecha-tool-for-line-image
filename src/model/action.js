@@ -89,6 +89,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
       where: { group_id: groupId, state, [taskField]: userId },
       include,
       orderBy: { id: "asc" },
+      take: ASSIGN_TASKS,
     });
 
     if (tasks.length === 0) {
