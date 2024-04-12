@@ -40,7 +40,7 @@ const Sidebar = ({
         }`}
       >
         <input id="my-drawer-3" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col items-center">
+        <div className="drawer-content flex flex-col items-center bg-white">
           {/* Navbar */}
           <div className="w-full navbar text-white bg-[#384451] lg:hidden">
             <div className="flex-none lg:hidden">
@@ -64,9 +64,9 @@ const Sidebar = ({
           </div>
           {children}
         </div>
-        <div className="drawer-side bg-[#54606e]">
+        <div className="drawer-side">
           <label htmlFor="my-drawer-3" className="drawer-overlay"></label>
-          <div className="flex flex-col w-80 min-h-full h-full text-white mb-10">
+          <div className="flex flex-col w-80 min-h-full h-full text-white mb-10 bg-[#54606e]">
             <header className="bg-[#384451] py-2 px-4">
               <div className="text-lg">{lang.title}</div>
             </header>
