@@ -14,6 +14,11 @@
   src: url("/font/OuChan2.ttf");
 }
 
+@font-face {
+  font-family: "OuChan";
+  src: url("/font/Jomolhari-Regular.ttf");
+}
+
 body {
   font-family: "Lato", "Trebuchet MS", Roboto, Helvetica, Arial, sans-serif;
 }

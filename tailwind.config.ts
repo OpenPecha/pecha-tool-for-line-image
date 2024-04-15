@@ -16,6 +16,7 @@ const config: Config = {
       fontFamily: {
         Petsuk: ["Petsuk", "sans-serif"],
         OuChan: ["OuChan", "sans-serif"],
+        Jomolhari: ["Jomolhari", "sans-serif"],
       },
     },
   },

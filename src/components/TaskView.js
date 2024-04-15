@@ -146,7 +146,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                     <input
                       value={transcript || ""}
                       onChange={(e) => setTranscript(e.target.value)}
-                      className="font-OuChan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
+                      className="font-Jomolhari rounded-md p-4 border border-slate-400 w-full h-full text-2xl"
                       placeholder="Type here..."
                       id="transcript"
                     />
@@ -155,7 +155,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                       rows={7}
                       value={transcript || ""}
                       onChange={(e) => setTranscript(e.target.value)}
-                      className="font-OuChan rounded-md p-4 border border-slate-400 w-full h-full text-xl"
+                      className="font-Jomolhari rounded-md p-4 border border-slate-400 w-full h-full text-2xl"
                       placeholder="Type here..."
                       id="transcript"
                     />
