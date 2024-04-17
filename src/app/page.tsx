@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { getUserTask } from "../model/action";
 import languagesObject from "../../data/language";
-import RightSidebar from "@/components/RightSidebar";
 import TaskView from "@/components/TaskView";
+export const dynamic = "force-dynamic";
 
 export default async function Home({ searchParams }: { searchParams: any }) {
   const language = languagesObject;
