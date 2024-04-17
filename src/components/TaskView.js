@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import DisplayImage from "@/components/DisplayImage";
+import TiptapEditor from "@/components/TipTapEditor";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -142,24 +143,10 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               <div className="w-[90%] my-5 md:my-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <DisplayImage task={taskList[0]} />
-                  {taskList[0]?.format === "line" ? (
-                    <input
-                      value={transcript || ""}
-                      onChange={(e) => setTranscript(e.target.value)}
-                      className="font-Jomolhari rounded-md p-4 border border-slate-400 w-full h-full text-2xl"
-                      placeholder="Type here..."
-                      id="transcript"
-                    />
-                  ) : (
-                    <textarea
-                      rows={7}
-                      value={transcript || ""}
-                      onChange={(e) => setTranscript(e.target.value)}
-                      className="font-Jomolhari rounded-md p-4 border border-slate-400 w-full h-full text-2xl"
-                      placeholder="Type here..."
-                      id="transcript"
-                    />
-                  )}
+                  <TiptapEditor
+                    transcript={transcript}
+                    setTranscript={setTranscript}
+                  />
                 </div>
               </div>
             </>

@@ -225,11 +225,17 @@ export const updateTask = async (
       dataToUpdate.duration = duration;
       break;
     case "REVIEWER":
+      dataToUpdate.transcript =
+        changedTask.state === "transcribing" ? transcript : task.transcript;
       dataToUpdate.reviewed_transcript =
         changedTask.state === "accepted" ? transcript : null;
       dataToUpdate.reviewed_at = new Date().toISOString();
       break;
     case "FINAL_REVIEWER":
+      dataToUpdate.reviewed_transcript =
+        changedTask.state === "submitted"
+          ? transcript
+          : task.reviewed_transcript;
       dataToUpdate.final_reviewed_transcript =
         changedTask.state === "finalised" ? transcript : null;
       dataToUpdate.final_reviewed_at = new Date().toISOString();

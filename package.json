@@ -10,6 +10,12 @@
   },
   "dependencies": {
     "@prisma/client": "^5.6.0",
+    "@tiptap/extension-color": "^2.3.0",
+    "@tiptap/extension-document": "^2.3.0",
+    "@tiptap/extension-paragraph": "^2.3.0",
+    "@tiptap/extension-text": "^2.3.0",
+    "@tiptap/extension-text-style": "^2.3.0",
+    "@tiptap/react": "^2.3.0",
     "@zoom-image/react": "^0.4.8",
     "daisyui": "^4.4.17",
     "next": "14.0.3",

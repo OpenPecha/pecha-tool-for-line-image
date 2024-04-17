@@ -8,6 +8,7 @@ import Link from "next/link";
 import ActionButtons from "./ActionButtons";
 import RightSidebar from "@/components/RightSidebar";
 import { AiOutlineStop } from "react-icons/ai";
+import TranscriptDisplay from "@/components/TranscriptDisplay";
 
 const Sidebar = ({
   children,
@@ -196,15 +197,7 @@ const Sidebar = ({
                   className="py-4 cursor-pointer flex justify-between gap-1 items-center border-b-2 border-b-[#384451]"
                   onClick={() => handleHistoryClick(task)}
                 >
-                  <p className="text-lg line-clamp-2">
-                    {role === "TRANSCRIBER"
-                      ? task.transcript !== null
-                        ? task.transcript
-                        : task.inference_transcript
-                      : task.reviewed_transcript !== null
-                      ? task.reviewed_transcript
-                      : task.transcript}
-                  </p>
+                  <TranscriptDisplay task={task} role={role} />
                   <div
                     className="tooltip tooltip-left"
                     data-tip={`${task.state}`}
