@@ -1,27 +1,7 @@
-import { useEditor, EditorContent } from "@tiptap/react";
-import { Color } from "@tiptap/extension-color";
-import Document from "@tiptap/extension-document";
-import Paragraph from "@tiptap/extension-paragraph";
-import Text from "@tiptap/extension-text";
-import TextStyle from "@tiptap/extension-text-style";
+import { EditorContent } from "@tiptap/react";
 import React, { useEffect } from "react";
 
-const TipTap = ({ transcript, setTranscript }) => {
-  const editor = useEditor({
-    extensions: [Document, Paragraph, Text, TextStyle, Color],
-    content: transcript,
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      setTranscript(html);
-    },
-    editable: true,
-    editorProps: {
-      attributes: {
-        class: "p-2",
-      },
-    },
-  });
-
+const TipTap = ({ transcript, editor }) => {
   // Update editor content if external `transcript` changes
   useEffect(() => {
     if (editor && transcript !== editor.getHTML()) {

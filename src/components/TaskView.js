@@ -9,6 +9,12 @@ import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import DisplayImage from "@/components/DisplayImage";
 import TipTap from "@/components/TipTap";
+import { useEditor } from "@tiptap/react";
+import { Color } from "@tiptap/extension-color";
+import Document from "@tiptap/extension-document";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
+import TextStyle from "@tiptap/extension-text-style";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -21,6 +27,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     totalTaskPassed: 0,
   }); // {completedTaskCount, totalTaskCount, totalTaskPassed}
   const [isLoading, setIsLoading] = useState(true);
+  const [output, setOutput] = useState(transcript);
   const { id: userId, group_id: groupId, role } = userDetail;
   const currentTimeRef = useRef(null);
 
@@ -69,14 +76,34 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     });
   };
 
+  const editor = useEditor({
+    extensions: [Document, Paragraph, Text, TextStyle, Color],
+    content: transcript,
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      setTranscript(html);
+    },
+    editable: true,
+    editorProps: {
+      attributes: {
+        class: "p-2",
+      },
+    },
+  });
+
   const updateTaskAndIndex = async (action, transcript, task) => {
+    let temp_transcript = transcript;
     try {
       const { id } = task;
+      if (role === "FINAL_REVIEWER" && action === "submit") {
+        const final_transcript = editor.getText();
+        temp_transcript = final_transcript;
+      }
       // update the task in the database
       const { msg, updatedTask } = await updateTask(
         action,
         id,
-        transcript,
+        temp_transcript,
         task,
         role,
         currentTimeRef.current
@@ -143,10 +170,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               <div className="w-[90%] my-5 md:my-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <DisplayImage task={taskList[0]} />
-                  <TipTap
-                    transcript={transcript}
-                    setTranscript={setTranscript}
-                  />
+                  <TipTap transcript={transcript} editor={editor} />
                 </div>
               </div>
             </>
