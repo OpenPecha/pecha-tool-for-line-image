@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import DisplayImage from "@/components/DisplayImage";
 import TipTapEditor from "./TipTapEditor";
+export const dynamic = "force-dynamic";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
