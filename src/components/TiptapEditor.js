@@ -8,7 +8,7 @@ import Text from "@tiptap/extension-text";
 import TextStyle from "@tiptap/extension-text-style";
 import React, { useEffect } from "react";
 
-const TiptapEditor = ({ transcript, setTranscript }) => {
+const TipTapEditor = ({ transcript, setTranscript }) => {
   const editor = useEditor({
     extensions: [Document, Paragraph, Text, TextStyle, Color],
     content: transcript,
@@ -74,4 +74,4 @@ const TiptapEditor = ({ transcript, setTranscript }) => {
   );
 };
 
-export default TiptapEditor;
+export default TipTapEditor;
