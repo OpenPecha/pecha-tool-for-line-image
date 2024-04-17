@@ -1,5 +1,3 @@
-"use client";
-
 import { useEditor, EditorContent } from "@tiptap/react";
 import { Color } from "@tiptap/extension-color";
 import Document from "@tiptap/extension-document";
