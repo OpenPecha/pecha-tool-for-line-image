@@ -1,7 +1,7 @@
-import { EditorContent } from "@tiptap/react";
+import { BubbleMenu, EditorContent } from "@tiptap/react";
 import React, { useEffect } from "react";
 
-const TipTap = ({ transcript, editor }) => {
+const TipTap = ({ transcript, editor, format }) => {
   // Update editor content if external `transcript` changes
   useEffect(() => {
     if (editor && transcript !== editor.getHTML()) {
@@ -23,14 +23,14 @@ const TipTap = ({ transcript, editor }) => {
           }
           value={editor.getAttributes("textStyle").color}
           data-testid="setColor"
-          className="m-1 border border-black border-solid rounded-md py-[0.1rem] px-[0.4rem] bg-white"
+          className="m-1 border border-black border-solid rounded-md px-[0.4rem] bg-white"
         />
         <button
           onClick={() => editor.chain().focus().setColor("#FF0000").run()}
           className={
             editor.isActive("textStyle", { color: "#FF0000" })
-              ? "is-active m-1 border border-black border-solid rounded-md py-[0.1rem] px-[0.4rem]"
-              : "m-1 border border-black border-solid rounded-md py-[0.1rem] px-[0.4rem] bg-white"
+              ? "is-active m-1 border border-black border-solid rounded-md px-[0.4rem]"
+              : "m-1 border border-black border-solid rounded-md px-[0.4rem] bg-white"
           }
           data-testid="setRed"
         >
@@ -39,15 +39,21 @@ const TipTap = ({ transcript, editor }) => {
         <button
           onClick={() => editor.chain().focus().unsetColor().run()}
           data-testid="unsetColor"
-          className="m-1 border border-black border-solid rounded-md py-[0.1rem] px-[0.4rem] bg-white"
+          className="m-1 border border-black border-solid rounded-md px-[0.4rem] bg-white"
         >
           unsetColor
         </button>
       </div>
-      <EditorContent
-        editor={editor}
-        className="font-Jomolhari rounded-md border border-slate-400 w-full h-full text-2xl my-2"
-      />
+      <div
+        className={`${
+          format === "page" ? "min-h-[280px]" : ""
+        } border border-gray-300 rounded-md mt-2`}
+      >
+        <EditorContent
+          editor={editor}
+          className="font-Jomolhari text-2xl my-2"
+        />
+      </div>
     </div>
   );
 };

@@ -86,7 +86,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     editable: true,
     editorProps: {
       attributes: {
-        class: "p-2",
+        class: "p-2 focus-within:outline-none",
       },
     },
   });
@@ -170,7 +170,11 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               <div className="w-[90%] my-5 md:my-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <DisplayImage task={taskList[0]} />
-                  <TipTap transcript={transcript} editor={editor} />
+                  <TipTap
+                    transcript={transcript}
+                    editor={editor}
+                    format={taskList[0]?.format}
+                  />
                 </div>
               </div>
             </>
