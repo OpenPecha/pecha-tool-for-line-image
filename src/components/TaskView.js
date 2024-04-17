@@ -8,7 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import DisplayImage from "@/components/DisplayImage";
-import TipTapEditor from "@/components/TipTapEditor";
+import TipTapEditor from "./TipTapEditor";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
