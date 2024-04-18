@@ -5,7 +5,7 @@ const TipTap = ({ transcript, editor, format }) => {
   // Update editor content if external `transcript` changes
   useEffect(() => {
     if (editor && transcript !== editor.getHTML()) {
-      editor.commands.setContent(transcript);
+      editor.commands.setContent(transcript?.replaceAll("\n", "<br>"));
     }
   }, [transcript, editor]);
 
@@ -46,7 +46,7 @@ const TipTap = ({ transcript, editor, format }) => {
       </div>
       <div
         className={`${
-          format === "page" ? "min-h-[280px]" : ""
+          format === "page" ? "min-h-[250px] max-h-[250px] overflow-auto" : ""
         } border border-gray-300 rounded-md mt-2`}
       >
         <EditorContent
