@@ -15,7 +15,7 @@ const TipTap = ({ transcript, editor, format }) => {
 
   return (
     <div className="w-full m-4">
-      <div className="flex gap-2">
+      <div className="flex gap-2 text-black">
         <input
           type="color"
           onInput={(event) =>
@@ -47,7 +47,7 @@ const TipTap = ({ transcript, editor, format }) => {
       <div
         className={`${
           format === "page" ? "min-h-[250px] max-h-[250px] overflow-auto" : ""
-        } border border-gray-300 rounded-md mt-2`}
+        } border border-gray-300 rounded-md mt-2 text-black`}
       >
         <EditorContent
           editor={editor}

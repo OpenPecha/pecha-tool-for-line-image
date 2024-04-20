@@ -69,16 +69,14 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
     REVIEWER: {
       state: "submitted",
       taskField: "reviewer_id",
-      include: { transcriber: true },
     },
     FINAL_REVIEWER: {
       state: "accepted",
       taskField: "final_reviewer_id",
-      include: { transcriber: true, reviewer: true },
     },
   };
 
-  const { state, taskField, include } = roleParams[role];
+  const { state, taskField } = roleParams[role];
 
   if (!state || !taskField) {
     throw new Error(`Invalid role provided: ${role}`);
@@ -87,7 +85,19 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
   try {
     let tasks = await prisma.task.findMany({
       where: { group_id: groupId, state, [taskField]: userId },
-      include,
+      select: {
+        id: true,
+        group_id: true,
+        state: true,
+        inference_transcript: true,
+        transcript: true,
+        reviewed_transcript: true,
+        final_reviewed_transcript: true,
+        url: true,
+        format: true,
+        transcriber: { select: { name: true } },
+        reviewer: { select: { name: true } },
+      },
       orderBy: { id: "asc" },
       take: ASSIGN_TASKS,
     });
@@ -115,6 +125,19 @@ export const assignUnassignedTasks = async (
 ) => {
   const unassignedTasks = await prisma.task.findMany({
     where: { group_id: groupId, state, [taskField]: null },
+    select: {
+      id: true,
+      group_id: true,
+      state: true,
+      inference_transcript: true,
+      transcript: true,
+      reviewed_transcript: true,
+      final_reviewed_transcript: true,
+      url: true,
+      format: true,
+      transcriber: { select: { name: true } },
+      reviewer: { select: { name: true } },
+    },
     orderBy: { id: "asc" },
     take: ASSIGN_TASKS,
   });
