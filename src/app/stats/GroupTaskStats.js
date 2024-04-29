@@ -31,8 +31,6 @@ const GroupTaskStats = ({ groupStatastic }) => {
     return `${randomColor}`;
   };
 
-  console.log("GroupTaskStats groupStatastic:::", groupStatastic);
-
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-5">
       {groupStatastic.map((group) => (
