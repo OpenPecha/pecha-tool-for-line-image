@@ -74,3 +74,47 @@ export const editGroup = async (id, formData) => {
     throw new Error("Failed to update the group.");
   }
 };
+
+export const getAllGroupTaskStats = async (groupList) => {
+  // make a array of diff list of group
+  const groupStatsList = [];
+  const taskStatsMain = await prisma.task.groupBy({
+    by: ["state", "group_id"],
+    _count: {
+      _all: true,
+    },
+  });
+
+  for (let group of groupList) {
+    const { id, name } = group;
+    const taskStatsCount = taskStatsMain.filter((task) => task.group_id === id);
+    // console.log("importedTaskCount:", taskStatsCount);
+    try {
+      // get the count of tasks imported for each group
+      const groupStats = {
+        id,
+        name,
+        taskTranscribingCount:
+          taskStatsCount.find((stats) => stats.state === "transcribing")?._count
+            ?._all ?? 0,
+        taskSubmittedCount:
+          taskStatsCount.find((stats) => stats.state === "submitted")?._count
+            ?._all ?? 0,
+        taskAcceptedCount:
+          taskStatsCount.find((stats) => stats.state === "accepted")?._count
+            ?._all ?? 0,
+        taskFinalisedCount:
+          taskStatsCount.find((stats) => stats.state === "finalised")?._count
+            ?._all ?? 0,
+        taskTrashedCount:
+          taskStatsCount.find((stats) => stats.state === "trashed")?._count
+            ?._all ?? 0,
+      };
+      groupStatsList.push(groupStats);
+    } catch (error) {
+      console.error("Error getting all groups task stats:", error);
+      throw new Error(error);
+    }
+  }
+  return groupStatsList;
+};
