@@ -8,7 +8,6 @@ ChartJS.register(ArcElement, Tooltip, Legend, Title);
 const GroupPieChart = ({ group }) => {
   //console.log("GroupPieChart:::", group);
   const {
-    taskImportedCount,
     taskTranscribingCount,
     taskSubmittedCount,
     taskAcceptedCount,
@@ -16,27 +15,19 @@ const GroupPieChart = ({ group }) => {
     taskTrashedCount,
   } = group;
   const data = {
-    labels: [
-      "Imported",
-      "Transcribing",
-      "Submitted",
-      "Accepted",
-      "Finalised",
-      "Trashed",
-    ],
+    labels: ["Transcribing", "Submitted", "Accepted", "Finalised", "Trashed"],
     datasets: [
       {
         label: "Task Count",
         data: [
-          taskImportedCount,
           taskTranscribingCount,
           taskSubmittedCount,
           taskAcceptedCount,
           taskFinalisedCount,
           taskTrashedCount,
         ],
-        backgroundColor: ["grey", "blue", "yellow", "green", "purple", "red"],
-        borderColor: ["grey", "blue", "yellow", "green", "purple", "red"],
+        backgroundColor: ["blue", "yellow", "green", "purple", "red"],
+        borderColor: ["blue", "yellow", "green", "purple", "red"],
         borderWidth: 1,
       },
     ],
