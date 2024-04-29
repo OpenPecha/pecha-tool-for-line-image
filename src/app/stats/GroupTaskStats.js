@@ -47,7 +47,7 @@ const GroupImportStats = ({ groupStatastic }) => {
             backgroundColor: `${generateRandomColor(group.id)}`,
           }}
         >
-          <div className="flex justify-center items-center gap-5 text-base md:text-xl font-bold">
+          <div className="flex justify-center items-center gap-5 text-base md:text-xl font-bold text-black">
             <p>{group.name}</p>
             <p>{group.taskTranscribingCount}</p>
           </div>

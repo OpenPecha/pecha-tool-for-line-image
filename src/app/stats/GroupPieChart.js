@@ -49,7 +49,7 @@ const GroupPieChart = ({ group }) => {
               title: {
                 display: true,
                 text: `${group.name ? group.name : ""}`,
-                color: "black",
+                color: "red",
                 font: {
                   size: 20,
                 },
