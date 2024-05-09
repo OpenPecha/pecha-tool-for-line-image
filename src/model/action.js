@@ -97,6 +97,8 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
         format: true,
         transcriber: { select: { name: true } },
         reviewer: { select: { name: true } },
+        reviewer_rejected_count: true,
+        final_reviewer_rejected_count: true,
       },
       orderBy: { id: "asc" },
       take: ASSIGN_TASKS,
@@ -137,6 +139,8 @@ export const assignUnassignedTasks = async (
       format: true,
       transcriber: { select: { name: true } },
       reviewer: { select: { name: true } },
+      reviewer_rejected_count: true,
+      final_reviewer_rejected_count: true,
     },
     orderBy: { id: "asc" },
     take: ASSIGN_TASKS,
@@ -253,6 +257,10 @@ export const updateTask = async (
       dataToUpdate.reviewed_transcript =
         changedTask.state === "accepted" ? transcript : null;
       dataToUpdate.reviewed_at = new Date().toISOString();
+      dataToUpdate.reviewer_rejected_count =
+        changedTask.state === "transcribing"
+          ? task.reviewer_rejected_count + 1
+          : task.reviewer_rejected_count;
       break;
     case "FINAL_REVIEWER":
       dataToUpdate.reviewed_transcript =
@@ -262,6 +270,10 @@ export const updateTask = async (
       dataToUpdate.final_reviewed_transcript =
         changedTask.state === "finalised" ? transcript : null;
       dataToUpdate.final_reviewed_at = new Date().toISOString();
+      dataToUpdate.final_reviewer_rejected_count =
+        changedTask.state === "submitted"
+          ? task.final_reviewer_rejected_count + 1
+          : task.final_reviewer_rejected_count;
       break;
     default:
       // Optionally handle invalid roles or do nothing
