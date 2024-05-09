@@ -27,6 +27,7 @@ function DisplayImage({ task }) {
         height={400}
         className="max-h-[40vh]"
         onLoad={handleImageLoad}
+        priority={true}
       />
     </div>
   );
