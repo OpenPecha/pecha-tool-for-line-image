@@ -10,6 +10,7 @@ const FinalReviewerTable = ({ finalReviewersStatistic }) => {
           <tr>
             <th>Final Reviewer Name</th>
             <th>Task Finalised</th>
+            <th>Rejected Count</th>
           </tr>
         </thead>
         <tbody>
@@ -21,6 +22,7 @@ const FinalReviewerTable = ({ finalReviewersStatistic }) => {
                 </Link>
               </td>
               <td>{finalReviewer.noFinalised}</td>
+              <td>{finalReviewer.noRejected}</td>
             </tr>
           ))}
         </tbody>

@@ -370,6 +370,7 @@ export const generateReviewerTaskReport = async (reviewer, dates) => {
     noReviewed: reviewerStats.noReviewed,
     noAccepted: reviewerStats.noAccepted,
     noFinalised: reviewerStats.noFinalised,
+    noRejected: reviewerStats.noRejected,
     noReviewedTranscriptCorrected: 0,
     cer: 0,
     totalCer: 0,
@@ -445,6 +446,7 @@ export const generateFinalReviewerTaskReport = async (
       id,
       name,
       noFinalised: 0,
+      noRejected: 0,
     };
 
     const updatedFinalReviwerObj = await getFinalReviewerTaskCount(

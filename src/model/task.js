@@ -321,10 +321,22 @@ export const getReviewerTaskCount = async (id, dates, reviewerObj) => {
       },
     });
 
+    //  sum of reviewer_rejected_count column
+    const sumObj = await prisma.task.aggregate({
+      where: {
+        ...baseWhere,
+        reviewer_rejected_count: { not: null },
+      },
+      _sum: {
+        reviewer_rejected_count: true,
+      },
+    });
+    const noRejected = sumObj._sum.reviewer_rejected_count;
     return {
       noReviewed,
       noAccepted,
       noFinalised,
+      noRejected,
     };
   } catch (error) {
     console.error(`Error fetching reviewer task counts:`, error);
@@ -387,6 +399,21 @@ export const getFinalReviewerTaskCount = async (
           },
         },
       });
+      //  sum of final_reviewer_rejected_count column
+      const sumObj = await prisma.task.aggregate({
+        where: {
+          final_reviewer_id: id,
+          final_reviewed_at: {
+            gte: new Date(fromDate).toISOString(),
+            lte: new Date(toDate).toISOString(),
+          },
+          final_reviewer_rejected_count: { not: null },
+        },
+        _sum: {
+          final_reviewer_rejected_count: true,
+        },
+      });
+      finalReviewerObj.noRejected = sumObj._sum.final_reviewer_rejected_count;
     } else {
       finalReviewerObj.noFinalised = await prisma.task.count({
         where: {
@@ -394,6 +421,17 @@ export const getFinalReviewerTaskCount = async (
           state: "finalised",
         },
       });
+      //  sum of final_reviewer_rejected_count column
+      const sumObj = await prisma.task.aggregate({
+        where: {
+          final_reviewer_id: id,
+          final_reviewer_rejected_count: { not: null },
+        },
+        _sum: {
+          final_reviewer_rejected_count: true,
+        },
+      });
+      finalReviewerObj.noRejected = sumObj._sum.final_reviewer_rejected_count;
     }
     return finalReviewerObj;
   } catch (error) {

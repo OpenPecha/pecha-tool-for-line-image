@@ -67,6 +67,7 @@ const ReviewerReportTable = ({ reviewersStatistic }) => {
             <th>Task Reviewed</th>
             <th>Task Accepted</th>
             <th>Task Finalised</th>
+            <th>Rejected Count</th>
             <th>Finalised %</th>
             <th>Task Corrected %</th>
             <th>Character Error %</th>
@@ -83,6 +84,7 @@ const ReviewerReportTable = ({ reviewersStatistic }) => {
               <td>{reviewer.noReviewed}</td>
               <td>{reviewer.noAccepted}</td>
               <td>{reviewer.noFinalised}</td>
+              <td>{reviewer.noRejected}</td>
               <td
                 className={`${glideRedtoGreen(
                   reviewer.noFinalised,
