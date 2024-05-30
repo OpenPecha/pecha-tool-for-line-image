@@ -65,6 +65,7 @@ const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
             <th>Transcriber Name</th>
             <th>Task Submitted</th>
             <th>Task Reviewed</th>
+            <th>Task Finalised</th>
             <th>Reviewed %</th>
             <th>Task Corrected %</th>
             <th>Character Error % (I/T)</th>
@@ -79,6 +80,7 @@ const TranscriberReportTable = ({ usersStatistic, selectGroup }) => {
               </td>
               <td>{user.noSubmitted}</td>
               <td>{user.noReviewed}</td>
+              <td>{user.noFinalised}</td>
               <td
                 className={`${glideRedtoGreen(
                   user.noReviewedBasedOnSubmitted,

@@ -1,10 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  getUserSpecificTasks,
-  getUserSpecificTasksCount,
-  getUserCompletedTasksCount,
-} from "@/model/task";
+import { getUserSpecificTasks, getUserCompletedTasksCount } from "@/model/task";
 import PaginationControls from "@/components/PaginationControls";
 import UserReportTable from "./UserReportTable";
 import Select from "@/components/Select";

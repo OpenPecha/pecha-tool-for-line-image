@@ -252,31 +252,79 @@ export const getTranscriberTaskList = async (id, dates, groupId) => {
   }
 };
 
-export const getTaskReviewedBasedOnSubmitted = async (id, dates, groupId) => {
-  const { from: fromDate, to: toDate } = dates;
-  let taskReviewedBasedOnSubmitted;
+const buildDateFilter = (fromDate, toDate) => {
   if (fromDate && toDate) {
-    taskReviewedBasedOnSubmitted = await prisma.task.findMany({
-      where: {
-        transcriber_id: parseInt(id),
-        state: { in: ["accepted", "finalised"] },
-        submitted_at: {
-          gte: new Date(fromDate).toISOString(),
-          lte: new Date(toDate).toISOString(),
-        },
-        group_id: parseInt(groupId),
+    return {
+      final_reviewed_at: {
+        gte: new Date(fromDate).toISOString(),
+        lte: new Date(toDate).toISOString(),
       },
-    });
-  } else {
-    taskReviewedBasedOnSubmitted = await prisma.task.findMany({
-      where: {
-        transcriber_id: parseInt(id),
-        state: { in: ["accepted", "finalised"] },
-        group_id: parseInt(groupId),
-      },
-    });
+    };
   }
-  return taskReviewedBasedOnSubmitted;
+  return {};
+};
+
+export const getFinalisedTaskCount = async (id, dates, groupId) => {
+  const { from: fromDate, to: toDate } = dates;
+
+  const transcriberId = parseInt(id); // Ensure id is an integer
+  const group_id = parseInt(groupId); // Ensure id is an integer
+
+  const dateFilter = buildDateFilter(fromDate, toDate);
+
+  try {
+    const finalisedCount = await prisma.task.count({
+      where: {
+        transcriber_id: transcriberId,
+        state: "finalised",
+        group_id,
+        ...dateFilter,
+      },
+    });
+
+    return finalisedCount;
+  } catch (error) {
+    console.error("Error getting reviewed and finalised task count:", error);
+    throw new Error("Error fetching task counts.");
+  }
+};
+
+export const getReviewedTaskCountBasedOnSubmittedAt = async (
+  id,
+  dates,
+  groupId
+) => {
+  const { from: fromDate, to: toDate } = dates;
+  const transcriberId = parseInt(id); // Ensure id is an integer
+  const group_id = parseInt(groupId); // Ensure id is an integer
+
+  const dateFilter =
+    fromDate && toDate
+      ? {
+          submitted_at: {
+            gte: new Date(fromDate).toISOString(),
+            lte: new Date(toDate).toISOString(),
+          },
+        }
+      : {};
+
+  try {
+    const submittedAtReviewedCount = await prisma.task.count({
+      where: {
+        transcriber_id: transcriberId,
+        state: { in: ["accepted", "finalised"] },
+        group_id,
+        ...dateFilter,
+      },
+    });
+    return submittedAtReviewedCount;
+  } catch (error) {
+    console.error(
+      "Error getting reviewed task count based on submitted at:",
+      error
+    );
+    throw new Error("Error fetching task counts.");
+  }
 };
 
 export const getReviewerTaskCount = async (id, dates, reviewerObj) => {

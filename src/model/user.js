@@ -6,9 +6,10 @@ import {
   getFinalReviewerTaskCount,
   getReviewerTaskCount,
   getReviewerTaskList,
-  getTaskReviewedBasedOnSubmitted,
+  getReviewedTaskCountBasedOnSubmittedAt,
   getTranscriberTaskList,
   getUserSpecificTasksCount,
+  getFinalisedTaskCount,
 } from "./task";
 
 const levenshtein = require("fast-levenshtein");
@@ -273,18 +274,25 @@ export const generateUserReportByGroup = async (groupId, dates) => {
 
 export const generateUsersTaskReport = async (user, dates, groupId) => {
   const { id: userId, name } = user;
-  const [submittedTaskCount, userTasks, reviewedTaskCount] = await Promise.all([
+  const [
+    submittedTaskCount,
+    userTasks,
+    submittedAtReviewedCount,
+    finalisedCount,
+  ] = await Promise.all([
     getUserSpecificTasksCount(userId, dates, groupId),
     getTranscriberTaskList(userId, dates, groupId),
-    getTaskReviewedBasedOnSubmitted(userId, dates, groupId),
+    getReviewedTaskCountBasedOnSubmittedAt(userId, dates, groupId),
+    getFinalisedTaskCount(userId, dates, groupId),
   ]);
 
   const transcriberObj = {
     id: userId,
     name,
     noSubmitted: submittedTaskCount,
-    noReviewedBasedOnSubmitted: reviewedTaskCount?.length || 0,
+    noReviewedBasedOnSubmitted: submittedAtReviewedCount || 0,
     noReviewed: 0,
+    noFinalised: finalisedCount || 0,
     noTranscriptCorrected: 0,
     characterCount: 0,
     cer: 0,
