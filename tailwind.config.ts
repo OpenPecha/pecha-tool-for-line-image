@@ -16,6 +16,7 @@ const config: Config = {
       fontFamily: {
         Petsuk: ["Petsuk"],
         Ouchan: ["Ouchan"],
+        Drutsa: ["Drutsa"],
       },
     },
   },

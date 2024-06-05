@@ -105,6 +105,23 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     }
   };
 
+  const petsukBatches = [
+    "batch19",
+    "batch20",
+    "batch21",
+    "batch22",
+    "batch23",
+    "batch24",
+    "batch25",
+  ];
+
+  const drutsaBatches = ["batch26", "batch27"];
+
+  const batchId = taskList[0]?.batch_id;
+
+  const isPetsuk = petsukBatches.includes(batchId);
+  const isDrutsa = drutsaBatches.includes(batchId);
+
   return (
     <AppContext.Provider
       value={{ languageSelected, setLanguageSelected, lang }}
@@ -143,7 +160,13 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                   <input
                     value={transcript || ""}
                     onChange={(e) => setTranscript(e.target.value)}
-                    className="font-Petsuk rounded-md p-4 border border-slate-400 w-full h-full text-xl"
+                    className={`${
+                      isPetsuk
+                        ? "font-Petsuk"
+                        : isDrutsa
+                        ? "font-Drutsa"
+                        : "font-Ouchan"
+                    } rounded-md p-4 border border-slate-400 w-full h-full text-2xl`}
                     placeholder="Type here..."
                     id="transcript"
                   />
