@@ -70,6 +70,20 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
       state: "submitted",
       taskField: "reviewer_id",
       include: { transcriber: true },
+      batchAssign: [
+        "batch19",
+        "batch20",
+        "batch21",
+        "batch22",
+        "batch23",
+        "batch24",
+        "batch25",
+        "batch26",
+        "batch27",
+        "batch28",
+        "batch29",
+        "batch30",
+      ],
     },
     FINAL_REVIEWER: {
       state: "accepted",
@@ -78,7 +92,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
     },
   };
 
-  const { state, taskField, include } = roleParams[role];
+  const { state, taskField, include, batchAssign } = roleParams[role];
 
   if (!state || !taskField) {
     throw new Error(`Invalid role provided: ${role}`);
@@ -86,13 +100,24 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
 
   try {
     let tasks = await prisma.task.findMany({
-      where: { group_id: groupId, state, [taskField]: userId },
+      where: {
+        group_id: groupId,
+        state,
+        [taskField]: userId,
+        ...(batchAssign && { batch_id: { in: batchAssign } }),
+      },
       include,
       orderBy: { id: "asc" },
     });
 
     if (tasks.length === 0) {
-      tasks = await assignUnassignedTasks(groupId, state, taskField, userId);
+      tasks = await assignUnassignedTasks(
+        groupId,
+        state,
+        taskField,
+        userId,
+        batchAssign
+      );
     }
 
     return tasks;
@@ -110,11 +135,17 @@ export const assignUnassignedTasks = async (
   groupId,
   state,
   taskField,
-  userId
+  userId,
+  batchAssign
 ) => {
   try {
     const unassignedTasks = await prisma.task.findMany({
-      where: { group_id: groupId, state, [taskField]: null },
+      where: {
+        group_id: groupId,
+        state,
+        [taskField]: null,
+        ...(batchAssign && { batch_id: { in: batchAssign } }),
+      },
       orderBy: { id: "asc" },
       take: ASSIGN_TASKS,
     });
