@@ -20,8 +20,16 @@ export const getUserDetails = async (email) => {
       where: {
         email,
       },
-      include: {
-        group: true,
+      select: {
+        id: true,
+        name: true,
+        group_id: true,
+        role: true,
+        group: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
     // Return early if no user data is found
@@ -69,7 +77,6 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
     REVIEWER: {
       state: "submitted",
       taskField: "reviewer_id",
-      include: { transcriber: true },
       batchAssign: [
         "batch19",
         "batch20",
@@ -88,11 +95,10 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
     FINAL_REVIEWER: {
       state: "accepted",
       taskField: "final_reviewer_id",
-      include: { transcriber: true, reviewer: true },
     },
   };
 
-  const { state, taskField, include, batchAssign } = roleParams[role];
+  const { state, taskField, batchAssign } = roleParams[role];
 
   if (!state || !taskField) {
     throw new Error(`Invalid role provided: ${role}`);
@@ -106,7 +112,19 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
         [taskField]: userId,
         ...(batchAssign && { batch_id: { in: batchAssign } }),
       },
-      include,
+      select: {
+        id: true,
+        group_id: true,
+        batch_id: true,
+        state: true,
+        inference_transcript: true,
+        transcript: true,
+        reviewed_transcript: true,
+        final_reviewed_transcript: true,
+        url: true,
+        transcriber: { select: { name: true } },
+        reviewer: { select: { name: true } },
+      },
       orderBy: { id: "asc" },
     });
 
@@ -147,6 +165,19 @@ export const assignUnassignedTasks = async (
         ...(batchAssign && { batch_id: { in: batchAssign } }),
       },
       orderBy: { id: "asc" },
+      select: {
+        id: true,
+        group_id: true,
+        batch_id: true,
+        state: true,
+        inference_transcript: true,
+        transcript: true,
+        reviewed_transcript: true,
+        final_reviewed_transcript: true,
+        url: true,
+        transcriber: { select: { name: true } },
+        reviewer: { select: { name: true } },
+      },
       take: ASSIGN_TASKS,
     });
 
