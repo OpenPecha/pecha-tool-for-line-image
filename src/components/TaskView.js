@@ -115,7 +115,15 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     "batch25",
   ];
 
-  const drutsaBatches = ["batch26", "batch27"];
+  const drutsaBatches = [
+    "batch26",
+    "batch27",
+    "batch28",
+    "batch29",
+    "batch30",
+    "batch31",
+    "batch32",
+  ];
 
   const batchId = taskList[0]?.batch_id;
 
