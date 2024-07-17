@@ -78,23 +78,19 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
       state: "submitted",
       taskField: "reviewer_id",
       batchAssign: [
-        "batch19",
-        "batch20",
-        "batch21",
-        "batch22",
-        "batch23",
-        "batch24",
-        "batch25",
-        "batch26",
-        "batch27",
-        "batch28",
-        "batch29",
-        "batch30",
+        "Norbuketaka-numbers-batch_1",
+        "Norbuketaka-numbers-batch_2",
+        "Norbuketaka-numbers-batch_3",
       ],
     },
     FINAL_REVIEWER: {
       state: "accepted",
       taskField: "final_reviewer_id",
+      batchAssign: [
+        "Norbuketaka-numbers-batch_1",
+        "Norbuketaka-numbers-batch_2",
+        "Norbuketaka-numbers-batch_3",
+      ],
     },
   };
 
@@ -110,7 +106,8 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
         group_id: groupId,
         state,
         [taskField]: userId,
-        ...(batchAssign && { batch_id: { in: batchAssign } }),
+        // if batchAssign, assiign task which is not in batchAssign
+        ...(batchAssign && { batch_id: { notIn: batchAssign } }),
       },
       select: {
         id: true,
@@ -162,7 +159,7 @@ export const assignUnassignedTasks = async (
         group_id: groupId,
         state,
         [taskField]: null,
-        ...(batchAssign && { batch_id: { in: batchAssign } }),
+        ...(batchAssign && { batch_id: { notIn: batchAssign } }),
       },
       orderBy: { id: "asc" },
       select: {
