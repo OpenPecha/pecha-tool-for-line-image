@@ -167,7 +167,7 @@ export const getTaskWithRevertedState = async (task, role) => {
   }
 };
 
-export const getUserSpecificTasksCount = async (id, dates) => {
+export const getUserSpecificTasksCount = async (id, dates, groupId) => {
   const { from: fromDate, to: toDate } = dates;
 
   const user = await prisma.user.findUnique({
@@ -186,6 +186,7 @@ export const getUserSpecificTasksCount = async (id, dates) => {
         : user.role === "REVIEWER"
         ? { in: ["accepted", "finalised"] }
         : { in: ["finalised"] }, // Defaults to FINAL_REVIEWER case
+    group_id: parseInt(groupId),
   };
 
   // Extend the base condition with date filters if both fromDate and toDate are provided
@@ -214,7 +215,7 @@ export const getUserSpecificTasksCount = async (id, dates) => {
   }
 };
 
-export const getTranscriberTaskList = async (id, dates) => {
+export const getTranscriberTaskList = async (id, dates, groupId) => {
   const { from: fromDate, to: toDate } = dates;
   try {
     if (fromDate && toDate) {
@@ -225,6 +226,7 @@ export const getTranscriberTaskList = async (id, dates) => {
             gte: new Date(fromDate),
             lte: new Date(toDate),
           },
+          group_id: parseInt(groupId),
         },
         select: {
           inference_transcript: true,
@@ -238,6 +240,7 @@ export const getTranscriberTaskList = async (id, dates) => {
       const filteredTasks = await prisma.task.findMany({
         where: {
           transcriber_id: id,
+          group_id: parseInt(groupId),
         },
         select: {
           inference_transcript: true,
@@ -254,7 +257,7 @@ export const getTranscriberTaskList = async (id, dates) => {
   }
 };
 
-export const getTaskReviewedBasedOnSubmitted = async (id, dates) => {
+export const getTaskReviewedBasedOnSubmitted = async (id, dates, groupId) => {
   const { from: fromDate, to: toDate } = dates;
   let taskReviewedBasedOnSubmitted;
   if (fromDate && toDate) {
@@ -262,6 +265,7 @@ export const getTaskReviewedBasedOnSubmitted = async (id, dates) => {
       where: {
         transcriber_id: parseInt(id),
         state: { in: ["accepted", "finalised"] },
+        group_id: parseInt(groupId),
         submitted_at: {
           gte: new Date(fromDate).toISOString(),
           lte: new Date(toDate).toISOString(),
@@ -273,6 +277,7 @@ export const getTaskReviewedBasedOnSubmitted = async (id, dates) => {
       where: {
         transcriber_id: parseInt(id),
         state: { in: ["accepted", "finalised"] },
+        group_id: parseInt(groupId),
       },
     });
   }
