@@ -151,20 +151,24 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
           ) : taskList?.length ? (
             <>
-              {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
-                <div>
-                  <p className="mt-4 md:mt-10">
-                    <strong>{lang.transcriber} : </strong>
-                    <span>{taskList[0]?.transcriber?.name}</span>
-                  </p>
-                  {role === "FINAL_REVIEWER" && (
-                    <p className="mt-2">
-                      <strong>{lang.reviewer} : </strong>
-                      <span>{taskList[0]?.reviewer?.name}</span>
-                    </p>
+              <div>
+                <p className="mt-4 md:mt-10">
+                  <strong>{lang.transcriber} : </strong>
+                  <span>{taskList[0]?.transcriber?.name}</span>
+                </p>
+                <p className="mt-2">
+                  <strong>{lang.reviewer} : </strong>
+                  <span>{taskList[0]?.reviewer?.name}</span>
+                  {role === "TRANSCRIBER" && taskList[0]?.reviewer?.name ? (
+                    <span className="text-red-500">
+                      {" "}
+                      (Rejected by {taskList[0]?.reviewer?.name})
+                    </span>
+                  ) : (
+                    ""
                   )}
-                </div>
-              )}
+                </p>
+              </div>
               <div className="w-[95%] mt-5 md:mt-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <DisplayImage url={taskList[0]?.url} />
