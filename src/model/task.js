@@ -186,8 +186,12 @@ export const getUserSpecificTasksCount = async (id, dates, groupId) => {
         : user.role === "REVIEWER"
         ? { in: ["accepted", "finalised"] }
         : { in: ["finalised"] }, // Defaults to FINAL_REVIEWER case
-    group_id: parseInt(groupId),
   };
+
+  // Add groupId condition if it's provided
+  if (groupId) {
+    baseWhereCondition.group_id = parseInt(groupId);
+  }
 
   // Extend the base condition with date filters if both fromDate and toDate are provided
   if (fromDate && toDate) {
