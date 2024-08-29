@@ -126,6 +126,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     "batch-test",
     "batch33",
     "batch34",
+    "batch35",
   ];
 
   const batchId = taskList[0]?.batch_id;
