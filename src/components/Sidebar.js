@@ -178,7 +178,8 @@ const Sidebar = ({
                     data-tip={`${task.state}`}
                   >
                     {(task.state === "submitted" ||
-                      task.state === "accepted") && <BsCheckLg size="1rem" />}
+                      task.state === "accepted" ||
+                      task.state == "finalised") && <BsCheckLg size="1rem" />}
                     {task.state === "trashed" && <BsTrash size="1rem" />}
                   </div>
                 </div>
