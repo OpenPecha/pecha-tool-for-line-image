@@ -195,14 +195,18 @@ export const assignUnassignedTasks = async (
 // get all the history of a user based on userId
 export const getUserHistory = async (userId, groupId, role) => {
   try {
+    let state;
+    if (role === "TRANSCRIBER") {
+      state = { in: ["submitted", "trashed"] };
+    } else if (role === "REVIEWER") {
+      state = "accepted";
+    } else {
+      state = "finalised";
+    }
+
     let whereCondition = {
       [`${role.toLowerCase()}_id`]: parseInt(userId),
-      state:
-        role === "TRANSCRIBER"
-          ? { in: ["submitted", "trashed"] }
-          : role === "REVIEWER"
-          ? { in: ["accepted", "trashed"] }
-          : "finalised",
+      state,
       group_id: parseInt(groupId),
     };
 
