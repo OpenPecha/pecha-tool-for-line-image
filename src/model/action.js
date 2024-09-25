@@ -106,8 +106,10 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
         group_id: groupId,
         state,
         [taskField]: userId,
-        // if batchAssign, assiign task which is not in batchAssign
-        ...(batchAssign && { batch_id: { notIn: batchAssign } }),
+        batch_id: {
+          not: "batch33", // Exclude batch33
+          ...(batchAssign && { notIn: batchAssign }),
+        },
       },
       select: {
         id: true,
@@ -159,7 +161,11 @@ export const assignUnassignedTasks = async (
         group_id: groupId,
         state,
         [taskField]: null,
-        ...(batchAssign && { batch_id: { notIn: batchAssign } }),
+        batch_id: {
+          not: "batch33",
+          // if batchAssign, assiign task which is not in batchAssign
+          ...(batchAssign && { notIn: batchAssign }),
+        },
       },
       orderBy: { id: "asc" },
       select: {
