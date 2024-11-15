@@ -3,6 +3,7 @@
 import { formatTime } from "@/lib/formatTime";
 import prisma from "@/service/db";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 const ASSIGN_TASKS = 10;
 const MAX_HISTORY = 10;
@@ -88,6 +89,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
       select: {
         id: true,
         group_id: true,
+        batch_id: true,
         state: true,
         inference_transcript: true,
         transcript: true,
@@ -100,7 +102,7 @@ export const getTasksOrAssignMore = async (groupId, userId, role) => {
         reviewer_rejected_count: true,
         final_reviewer_rejected_count: true,
       },
-      orderBy: { id: "asc" },
+      // orderBy: { batch_id: "asc" },
       take: ASSIGN_TASKS,
     });
 
@@ -125,26 +127,73 @@ export const assignUnassignedTasks = async (
   taskField,
   userId
 ) => {
-  const unassignedTasks = await prisma.task.findMany({
-    where: { group_id: groupId, state, [taskField]: null },
-    select: {
-      id: true,
-      group_id: true,
-      state: true,
-      inference_transcript: true,
-      transcript: true,
-      reviewed_transcript: true,
-      final_reviewed_transcript: true,
-      url: true,
-      format: true,
-      transcriber: { select: { name: true } },
-      reviewer: { select: { name: true } },
-      reviewer_rejected_count: true,
-      final_reviewer_rejected_count: true,
-    },
-    orderBy: { id: "asc" },
-    take: ASSIGN_TASKS,
-  });
+  // const unassignedTasks = await prisma.task.findMany({
+  //   where: { group_id: groupId, state, [taskField]: null },
+  //   select: {
+  //     id: true,
+  //     group_id: true,
+  //     state: true,
+  //     inference_transcript: true,
+  //     transcript: true,
+  //     reviewed_transcript: true,
+  //     final_reviewed_transcript: true,
+  //     url: true,
+  //     format: true,
+  //     transcriber: { select: { name: true } },
+  //     reviewer: { select: { name: true } },
+  //     reviewer_rejected_count: true,
+  //     final_reviewer_rejected_count: true,
+  //   },
+  //   orderBy: { id: "asc" },
+  //   take: ASSIGN_TASKS,
+  // });
+
+  const unassignedTasks = await prisma.$queryRaw(
+    Prisma.sql`
+      WITH ordered_batches AS (
+        SELECT DISTINCT batch_id,
+          CAST(REGEXP_REPLACE(
+            SUBSTRING(batch_id FROM 'Correction-(\d+)'),
+            '\D',
+            '',
+            'g'
+          ) AS INTEGER) as numeric_part,
+          SUBSTRING(batch_id FROM '[a-z]$') as letter_suffix
+        FROM "Task"
+        WHERE group_id = ${groupId}
+          AND state = ${state}::"State"
+          AND ${Prisma.raw(taskField)} IS NULL
+        ORDER BY 
+          numeric_part,
+          letter_suffix NULLS FIRST
+        LIMIT 1
+      )
+      SELECT 
+        t.id,
+        t.group_id,
+        t.state,
+        t.batch_id,
+        t.inference_transcript,
+        t.transcript,
+        t.reviewed_transcript,
+        t.final_reviewed_transcript,
+        t.url,
+        t.format,
+        t.reviewer_rejected_count,
+        t.final_reviewer_rejected_count,
+        tr.name as "transcriber.name",
+        r.name as "reviewer.name"
+      FROM "Task" t
+      LEFT JOIN "User" tr ON t.transcriber_id = tr.id
+      LEFT JOIN "User" r ON t.reviewer_id = r.id
+      WHERE 
+        t.group_id = ${groupId}
+        AND t.state = ${state}::"State"
+        AND t.${Prisma.raw(taskField)} IS NULL
+        AND t.batch_id = (SELECT batch_id FROM ordered_batches)
+      LIMIT ${ASSIGN_TASKS}
+    `
+  );
 
   if (unassignedTasks.length > 0) {
     await prisma.task.updateMany({
