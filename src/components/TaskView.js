@@ -166,12 +166,20 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
                 <div>
                   <p className="mt-4 md:mt-10 text-black">
                     <strong>{lang.transcriber} : </strong>
-                    <span>{taskList[0]?.transcriber?.name}</span>
+                    <span>
+                      {taskList[0]?.transcriber
+                        ? taskList[0].transcriber?.name
+                        : taskList[0]["transcriber.name"]}
+                    </span>
                   </p>
                   {role === "FINAL_REVIEWER" && (
                     <p className="mt-2 text-black">
                       <strong>{lang.reviewer} : </strong>
-                      <span>{taskList[0]?.reviewer?.name}</span>
+                      <span>
+                        {taskList[0]?.reviewer
+                          ? taskList[0]?.reviewer?.name
+                          : taskList[0]["reviewer.name"]}
+                      </span>
                     </p>
                   )}
                 </div>

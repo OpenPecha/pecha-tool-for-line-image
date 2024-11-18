@@ -151,21 +151,23 @@ export const assignUnassignedTasks = async (
   const unassignedTasks = await prisma.$queryRaw(
     Prisma.sql`
       WITH ordered_batches AS (
-        SELECT DISTINCT batch_id,
+        SELECT DISTINCT 
+          batch_id,
+          SUBSTRING(batch_id FROM '^[^-]+') as prefix,
           CAST(REGEXP_REPLACE(
-            SUBSTRING(batch_id FROM 'Correction-(\d+)'),
-            '\D',
+            SPLIT_PART(REPLACE(REPLACE(batch_id, 'Correction-', ''), 'Manual-', ''), 'a', 1),
+            '[^0-9]',
             '',
             'g'
-          ) AS INTEGER) as numeric_part,
-          SUBSTRING(batch_id FROM '[a-z]$') as letter_suffix
+          ) AS INTEGER) as numeric_part
         FROM "Task"
         WHERE group_id = ${groupId}
           AND state = ${state}::"State"
           AND ${Prisma.raw(taskField)} IS NULL
         ORDER BY 
+          prefix ASC,
           numeric_part,
-          letter_suffix NULLS FIRST
+          batch_id
         LIMIT 1
       )
       SELECT 
