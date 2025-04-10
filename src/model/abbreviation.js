@@ -2,19 +2,42 @@
 
 import prisma from "@/service/db";
 
-export const getAbbreviations = async () => {
+export const getAbbreviations = async (page = 0, pageSize = 10) => {
   try {
+    const skip = page * pageSize;
+    
+    // Get the requested page of abbreviations
     const abbreviations = await prisma.abbreviation.findMany({
       orderBy: {
         convention: "asc",
       },
-      take: 50,
+      skip,
+      take: pageSize,
     });
-    console.log("Abbreviations:", abbreviations);
-    return abbreviations;
+    
+    // Get the total count for pagination info
+    const totalCount = await prisma.abbreviation.count();
+    
+    return {
+      abbreviations,
+      pagination: {
+        page,
+        pageSize,
+        totalCount,
+        hasMore: skip + pageSize < totalCount
+      }
+    };
   } catch (error) {
     console.error("Error fetching abbreviations:", error);
-    return [];
+    return {
+      abbreviations: [],
+      pagination: {
+        page,
+        pageSize,
+        totalCount: 0,
+        hasMore: false
+      }
+    };
   }
 };
 
