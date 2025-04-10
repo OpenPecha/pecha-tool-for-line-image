@@ -2,7 +2,6 @@
 
 import { getTasksOrAssignMore, updateTask } from "@/model/action";
 import React, { useState, useRef, useEffect } from "react";
-import ActionButtons from "./ActionButtons";
 import { UserProgressStats } from "@/model/task";
 import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
@@ -17,6 +16,7 @@ import Text from "@tiptap/extension-text";
 import TextStyle from "@tiptap/extension-text-style";
 import HardBreak from "@tiptap/extension-hard-break";
 import History from "@tiptap/extension-history";
+import AbbreviationList from "@/components/AbbreviationList";
 
 const TaskView = ({ tasks, userDetail, language, userHistory }) => {
   const [languageSelected, setLanguageSelected] = useState("bo");
@@ -29,9 +29,10 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
     totalTaskPassed: 0,
   }); // {completedTaskCount, totalTaskCount, totalTaskPassed}
   const [isLoading, setIsLoading] = useState(true);
-  const [output, setOutput] = useState(transcript);
   const { id: userId, group_id: groupId, role } = userDetail;
   const currentTimeRef = useRef(null);
+  const [isAbbreviationSidebarOpen, setIsAbbreviationSidebarOpen] =
+    useState(false);
 
   function getLastTaskIndex() {
     return taskList.length != 0 ? taskList?.length - 1 : 0;
@@ -162,6 +163,30 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
           ) : taskList?.length ? (
             <>
+              <div className="w-full flex justify-end px-4 mt-2">
+                <button
+                  onClick={() =>
+                    setIsAbbreviationSidebarOpen(!isAbbreviationSidebarOpen)
+                  }
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                  aria-label="Toggle abbreviation sidebar"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                </button>
+              </div>
               {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
                 <div>
                   <p className="mt-4 md:mt-10 text-black">
@@ -204,6 +229,10 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
           )}
         </div>
       </Sidebar>
+      <AbbreviationList
+        isOpen={isAbbreviationSidebarOpen}
+        onClose={() => setIsAbbreviationSidebarOpen(false)}
+      />
     </AppContext.Provider>
   );
 };
