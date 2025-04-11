@@ -22,6 +22,7 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
 
   const pageSize = 10;
   const tableContainerRef = useRef(null);
+  const sidebarRef = useRef(null);
   const isReviewer = userRole === "REVIEWER";
 
   // Function to load more abbreviations
@@ -57,6 +58,23 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
       loadAbbreviations(0);
     }
   }, [isOpen, loadAbbreviations]);
+
+  // Handle click outside to close sidebar
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
 
   // Handle scroll events for infinite scrolling
   const handleScroll = useCallback(() => {
@@ -143,7 +161,10 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg z-50 overflow-hidden flex flex-col">
+    <div
+      className="fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg z-50 overflow-hidden flex flex-col"
+      ref={sidebarRef}
+    >
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-xl font-semibold">
           Abbreviation Dictionary{" "}
