@@ -14,6 +14,7 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
     image: "",
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
@@ -32,16 +33,38 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setSelectedFile(file);
+
     // Create a preview URL for the selected image
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
-      setNewAbbreviation((prev) => ({
-        ...prev,
-        image: reader.result,
-      }));
     };
     reader.readAsDataURL(file);
+  };
+
+  // Upload image to S3
+  const uploadImageToS3 = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to upload image");
+      }
+
+      return data.url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
   };
 
   // Submit new abbreviation
@@ -54,10 +77,16 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
     try {
       setLoading(true);
 
+      let imageUrl = "";
+      if (selectedFile) {
+        // Upload image to S3 and get the URL
+        imageUrl = await uploadImageToS3(selectedFile);
+      }
+
       const result = await addAbbreviation(
         newAbbreviation.convention,
         newAbbreviation.expansion,
-        newAbbreviation.image
+        imageUrl
       );
 
       if (result) {
@@ -83,6 +112,7 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
       image: "",
     });
     setImagePreview(null);
+    setSelectedFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
