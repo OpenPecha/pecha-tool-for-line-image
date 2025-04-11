@@ -232,6 +232,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
       <AbbreviationList
         isOpen={isAbbreviationSidebarOpen}
         onClose={() => setIsAbbreviationSidebarOpen(false)}
+        userRole={role}
       />
     </AppContext.Provider>
   );
