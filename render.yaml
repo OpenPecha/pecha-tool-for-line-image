@@ -5,6 +5,7 @@ services:
     repo: https://github.com/OpenPecha/pecha-tool-for-line-image.git
     branch: feat-dictionary
     plan: starter
+    region: singapore
     buildCommand: npm ci --production=false && npm run build && npm prune --production
     startCommand: npx prisma migrate deploy && npm run start
     autoDeploy: false
