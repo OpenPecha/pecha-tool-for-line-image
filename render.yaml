@@ -1,7 +1,9 @@
 services:
   - type: web
-    name: htr
-    env: node
+    name: Normalisation
+    runtime: node
+    repo: https://github.com/OpenPecha/pecha-tool-for-line-image.git
+    branch: feat-dictionary
     plan: starter
     buildCommand: npm ci --production=false && npm run build && npm prune --production
     startCommand: npx prisma migrate deploy && npm run start
@@ -13,9 +15,9 @@ services:
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: htr-pg
+          name: normalisation-pg
           property: connectionString
 
 databases:
-  - name: htr-pg
+  - name: normalisation-pg
     plan: standard
