@@ -210,14 +210,17 @@ export const assignUnassignedTasks = async (
 // get all the history of a user based on userId
 export const getUserHistory = async (userId, groupId, role) => {
   try {
+    let stateValue;
+    if (role === "TRANSCRIBER") {
+      stateValue = { in: ["submitted", "trashed"] };
+    } else if (role === "REVIEWER") {
+      stateValue = "accepted";
+    } else {
+      stateValue = "finalised";
+    }
     let whereCondition = {
       [`${role.toLowerCase()}_id`]: parseInt(userId),
-      state:
-        role === "TRANSCRIBER"
-          ? { in: ["submitted", "trashed"] }
-          : role === "REVIEWER"
-          ? "accepted"
-          : "finalised",
+      state: stateValue,
       group_id: parseInt(groupId),
     };
 
@@ -270,7 +273,42 @@ export const changeTaskState = (task, role, action) => {
   return { ...task, state: newState };
 };
 
-// update the takes based on user action
+// Helper functions to reduce complexity
+function getTranscriberUpdate(changedTask, transcript, duration) {
+  return {
+    transcript: changedTask.state === "trashed" ? null : transcript,
+    submitted_at: new Date().toISOString(),
+    duration,
+  };
+}
+
+function getReviewerUpdate(changedTask, transcript, task) {
+  return {
+    transcript:
+      changedTask.state === "transcribing" ? transcript : task.transcript,
+    reviewed_transcript: changedTask.state === "accepted" ? transcript : null,
+    reviewed_at: new Date().toISOString(),
+    reviewer_rejected_count:
+      changedTask.state === "transcribing"
+        ? task.reviewer_rejected_count + 1
+        : task.reviewer_rejected_count,
+  };
+}
+
+function getFinalReviewerUpdate(changedTask, transcript, task) {
+  return {
+    reviewed_transcript:
+      changedTask.state === "submitted" ? transcript : task.reviewed_transcript,
+    final_reviewed_transcript:
+      changedTask.state === "finalised" ? transcript : null,
+    final_reviewed_at: new Date().toISOString(),
+    final_reviewer_rejected_count:
+      changedTask.state === "submitted"
+        ? task.final_reviewer_rejected_count + 1
+        : task.final_reviewer_rejected_count,
+  };
+}
+
 export const updateTask = async (
   action,
   id,
@@ -294,42 +332,31 @@ export const updateTask = async (
     state: changedTask.state,
   };
 
-  // Add role-specific fields
+  // Add role-specific fields using helpers
+  let roleSpecificFields = {};
   switch (role) {
     case "TRANSCRIBER":
-      dataToUpdate.transcript =
-        changedTask.state === "trashed" ? null : transcript;
-      dataToUpdate.submitted_at = new Date().toISOString();
-      dataToUpdate.duration = duration;
+      roleSpecificFields = getTranscriberUpdate(
+        changedTask,
+        transcript,
+        duration
+      );
       break;
     case "REVIEWER":
-      dataToUpdate.transcript =
-        changedTask.state === "transcribing" ? transcript : task.transcript;
-      dataToUpdate.reviewed_transcript =
-        changedTask.state === "accepted" ? transcript : null;
-      dataToUpdate.reviewed_at = new Date().toISOString();
-      dataToUpdate.reviewer_rejected_count =
-        changedTask.state === "transcribing"
-          ? task.reviewer_rejected_count + 1
-          : task.reviewer_rejected_count;
+      roleSpecificFields = getReviewerUpdate(changedTask, transcript, task);
       break;
     case "FINAL_REVIEWER":
-      dataToUpdate.reviewed_transcript =
-        changedTask.state === "submitted"
-          ? transcript
-          : task.reviewed_transcript;
-      dataToUpdate.final_reviewed_transcript =
-        changedTask.state === "finalised" ? transcript : null;
-      dataToUpdate.final_reviewed_at = new Date().toISOString();
-      dataToUpdate.final_reviewer_rejected_count =
-        changedTask.state === "submitted"
-          ? task.final_reviewer_rejected_count + 1
-          : task.final_reviewer_rejected_count;
+      roleSpecificFields = getFinalReviewerUpdate(
+        changedTask,
+        transcript,
+        task
+      );
       break;
     default:
-      // Optionally handle invalid roles or do nothing
       console.error(`Invalid role: ${role}`);
   }
+
+  Object.assign(dataToUpdate, roleSpecificFields);
 
   try {
     const updatedTask = await prisma.task.update({

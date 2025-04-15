@@ -1,7 +1,7 @@
 "use client";
 
 import { getTasksOrAssignMore, updateTask } from "@/model/action";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { UserProgressStats } from "@/model/task";
 import Sidebar from "@/components/Sidebar";
 import toast from "react-hot-toast";
@@ -18,135 +18,128 @@ import HardBreak from "@tiptap/extension-hard-break";
 import History from "@tiptap/extension-history";
 import AbbreviationList from "@/components/AbbreviationList";
 
-const TaskView = ({ tasks, userDetail, language, userHistory }) => {
-  const [languageSelected, setLanguageSelected] = useState("bo");
-  const lang = language[languageSelected];
-  const [taskList, setTaskList] = useState(tasks);
-  const [transcript, setTranscript] = useState("");
+// Custom hook for user progress stats
+function useUserProgressStats(userId, role, groupId) {
   const [userTaskStats, setUserTaskStats] = useState({
     completedTaskCount: 0,
     totalTaskCount: 0,
     totalTaskPassed: 0,
-  }); // {completedTaskCount, totalTaskCount, totalTaskPassed}
+  });
+
+  const getUserProgress = useCallback(async () => {
+    const { completedTaskCount, totalTaskCount, totalTaskPassed } =
+      await UserProgressStats(userId, role, groupId);
+    setUserTaskStats({ completedTaskCount, totalTaskCount, totalTaskPassed });
+  }, [userId, role, groupId]);
+
+  return [userTaskStats, getUserProgress];
+}
+
+const TaskView = ({ tasks, userDetail, language, userHistory }) => {
+  // --- State ---
+  const [languageSelected, setLanguageSelected] = useState("bo");
+  const lang = language[languageSelected];
+  const [taskList, setTaskList] = useState(tasks);
+  const [transcript, setTranscript] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const { id: userId, group_id: groupId, role } = userDetail;
+  const [isAbbreviationSidebarOpen, setIsAbbreviationSidebarOpen] = useState(false);
   const currentTimeRef = useRef(null);
-  const [isAbbreviationSidebarOpen, setIsAbbreviationSidebarOpen] =
-    useState(false);
+  const { id: userId, group_id: groupId, role } = userDetail;
 
-  function getLastTaskIndex() {
-    return taskList.length != 0 ? taskList?.length - 1 : 0;
-  }
+  // --- User Progress ---
+  const [userTaskStats, getUserProgress] = useUserProgressStats(userId, role, groupId);
 
+  // --- Helpers ---
+  const getLastTaskIndex = useCallback(() => (taskList.length !== 0 ? taskList.length - 1 : 0), [taskList]);
+
+  // --- Initialize transcript based on role and task ---
+  const initializeTranscript = useCallback(() => {
+    if (!taskList?.length) {
+      setTranscript("");
+      return;
+    }
+    const task = taskList[0];
+    switch (role) {
+      case "TRANSCRIBER":
+        setTranscript(task.transcript || task.inference_transcript || "");
+        break;
+      case "REVIEWER":
+        setTranscript(task.reviewed_transcript || task.transcript || "");
+        break;
+      case "FINAL_REVIEWER":
+        setTranscript(task.final_reviewed_transcript || task.reviewed_transcript || "");
+        break;
+      default:
+        setTranscript("");
+    }
+  }, [taskList, role]);
+
+  // --- Effects ---
   useEffect(() => {
     getUserProgress();
-    // Assign a value to currentTimeRef.current
     currentTimeRef.current = new Date().toISOString();
     if (taskList?.length) {
       setIsLoading(false);
-      switch (role) {
-        case "TRANSCRIBER":
-          taskList[0]?.transcript != null && taskList[0]?.transcript != ""
-            ? setTranscript(taskList[0]?.transcript)
-            : setTranscript(taskList[0]?.inference_transcript);
-          break;
-        case "REVIEWER":
-          taskList[0].reviewed_transcript != null &&
-          taskList[0].reviewed_transcript != ""
-            ? setTranscript(taskList[0]?.reviewed_transcript)
-            : setTranscript(taskList[0]?.transcript);
-          break;
-        case "FINAL_REVIEWER":
-          taskList[0].final_reviewed_transcript != null &&
-          taskList[0].final_reviewed_transcript != ""
-            ? setTranscript(taskList[0]?.final_reviewed_transcript)
-            : setTranscript(taskList[0]?.reviewed_transcript);
-        default:
-          break;
-      }
+      initializeTranscript();
     } else {
       setIsLoading(false);
+      setTranscript("");
     }
-  }, [taskList]);
+  }, [taskList, getUserProgress, initializeTranscript]);
 
-  const getUserProgress = async () => {
-    const { completedTaskCount, totalTaskCount, totalTaskPassed } =
-      await UserProgressStats(userId, role, groupId);
-    setUserTaskStats({
-      completedTaskCount,
-      totalTaskCount,
-      totalTaskPassed,
-    });
-  };
-
+  // --- Editor ---
   const editor = useEditor({
-    extensions: [
-      Document,
-      Paragraph,
-      Text,
-      TextStyle,
-      Color,
-      HardBreak,
-      History,
-    ],
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      setTranscript(html);
-    },
+    extensions: [Document, Paragraph, Text, TextStyle, Color, HardBreak, History],
+    onUpdate: ({ editor }) => setTranscript(editor.getHTML()),
     editable: true,
-    editorProps: {
-      attributes: {
-        class: "p-2 focus-within:outline-none",
-      },
-    },
+    editorProps: { attributes: { class: "p-2 focus-within:outline-none" } },
   });
 
-  const updateTaskAndIndex = async (action, transcript, task) => {
-    let temp_transcript = transcript;
-    try {
-      const { id } = task;
-      if (role === "FINAL_REVIEWER" && action === "submit") {
-        const final_transcript = editor.getText();
-        temp_transcript = final_transcript;
-      }
-      // update the task in the database
-      const { msg, updatedTask } = await updateTask(
-        action,
-        id,
-        temp_transcript,
-        task,
-        role,
-        currentTimeRef.current
-      );
-      if (msg?.error) {
-        toast.error(msg.error);
-      } else {
-        toast.success(msg.success);
-      }
-      if (action === "submit") {
-        getUserProgress();
-      }
-      if (getLastTaskIndex() != 0) {
-        // remove the task updated from the task list
-        setTaskList((prev) => prev.filter((task) => task.id !== id));
-        if (action === "submit") {
-          currentTimeRef.current = new Date().toISOString();
+  // --- Task Update Handler ---
+  const updateTaskAndIndex = useCallback(
+    async (action, transcript, task) => {
+      let temp_transcript = transcript;
+      try {
+        const { id } = task;
+        if (role === "FINAL_REVIEWER" && action === "submit") {
+          temp_transcript = editor.getText();
         }
-      } else {
-        // when it is the last task in the task list
-        const moreTask = await getTasksOrAssignMore(groupId, userId, role);
-        setIsLoading(true);
-        setTaskList(moreTask);
+        const { msg, updatedTask } = await updateTask(
+          action,
+          id,
+          temp_transcript,
+          task,
+          role,
+          currentTimeRef.current
+        );
+        if (msg?.error) {
+          toast.error(msg.error);
+        } else {
+          toast.success(msg.success);
+        }
+        if (action === "submit") {
+          getUserProgress();
+        }
+        if (getLastTaskIndex() !== 0) {
+          setTaskList((prev) => prev.filter((task) => task.id !== id));
+          if (action === "submit") {
+            currentTimeRef.current = new Date().toISOString();
+          }
+        } else {
+          const moreTask = await getTasksOrAssignMore(groupId, userId, role);
+          setIsLoading(true);
+          setTaskList(moreTask);
+        }
+      } catch (error) {
+        throw new Error(error);
       }
-    } catch (error) {
-      throw new Error(error);
-    }
-  };
+    },
+    [role, editor, getUserProgress, getLastTaskIndex, groupId, userId]
+  );
 
+  // --- Render ---
   return (
-    <AppContext.Provider
-      value={{ languageSelected, setLanguageSelected, lang }}
-    >
+    <AppContext.Provider value={{ languageSelected, setLanguageSelected, lang }}>
       <Sidebar
         userDetail={userDetail}
         userTaskStats={userTaskStats}
@@ -157,7 +150,6 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
         updateTaskAndIndex={updateTaskAndIndex}
         transcript={transcript}
       >
-        {/* Page content here */}
         <div className="w-full flex flex-col justify-center items-center">
           {isLoading ? (
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
@@ -165,9 +157,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
             <>
               <div className="w-full flex justify-end px-4 mt-2">
                 <button
-                  onClick={() =>
-                    setIsAbbreviationSidebarOpen(!isAbbreviationSidebarOpen)
-                  }
+                  onClick={() => setIsAbbreviationSidebarOpen((v) => !v)}
                   className="p-2 hover:bg-gray-100 rounded-full"
                   aria-label="Toggle abbreviation sidebar"
                 >
@@ -212,11 +202,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               <div className="w-[90%] my-5 md:my-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
                   <DisplayImage task={taskList[0]} />
-                  <TipTap
-                    transcript={transcript}
-                    editor={editor}
-                    format={taskList[0]?.format}
-                  />
+                  <TipTap transcript={transcript} editor={editor} format={taskList[0]?.format} />
                 </div>
               </div>
             </>
