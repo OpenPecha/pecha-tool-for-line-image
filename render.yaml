@@ -20,4 +20,5 @@ services:
 
 databases:
   - name: normalisation-pg
-    plan: starter
+    plan: free
+    region: singapore
