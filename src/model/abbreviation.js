@@ -104,3 +104,25 @@ export const deleteAbbreviation = async (id) => {
     return null;
   }
 };
+
+/**
+ * Fetch all abbreviations (convention and expansion only).
+ * Returns an array of { convention, expansion } objects.
+ */
+export async function getAllAbbreviationConventions() {
+  try {
+    const abbreviations = await prisma.abbreviation.findMany({
+      select: {
+        convention: true,
+        expansion: true,
+      },
+      orderBy: {
+        convention: "asc",
+      },
+    });
+    return abbreviations;
+  } catch (error) {
+    console.error("Error fetching all abbreviation conventions:", error);
+    return [];
+  }
+}
