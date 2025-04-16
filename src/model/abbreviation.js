@@ -126,3 +126,24 @@ export async function getAllAbbreviationConventions() {
     return [];
   }
 }
+
+// search abbreviations
+export async function searchAbbreviations(searchTerm) {
+  try {
+    const abbreviations = await prisma.abbreviation.findMany({
+      where: {
+        OR: [
+          { convention: { contains: searchTerm, mode: "insensitive" } },
+          { expansion: { contains: searchTerm, mode: "insensitive" } },
+        ],
+      },
+      orderBy: {
+        convention: "asc",
+      },
+    });
+    return abbreviations;
+  } catch (error) {
+    console.error("Error searching abbreviations:", error);
+    return [];
+  }
+}

@@ -1,20 +1,24 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import PropTypes from "prop-types";
-import { getAbbreviations, updateAbbreviation } from "@/model/abbreviation";
+import { getAbbreviations, updateAbbreviation, searchAbbreviations } from "@/model/abbreviation";
 import toast from "react-hot-toast";
 import AddAbbreviationDialog from "./AddAbbreviationDialog";
 
 // Custom hook for managing abbreviations data and pagination
 const useAbbreviations = (isOpen) => {
   const [abbreviations, setAbbreviations] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchMode, setIsSearchMode] = useState(false);
 
   const pageSize = 10;
 
@@ -62,22 +66,67 @@ const useAbbreviations = (isOpen) => {
 
   // Function to update a single abbreviation in the list
   const updateAbbreviationInList = useCallback((id, updatedData) => {
+    // Update in regular list
     setAbbreviations((prevAbbrs) =>
       prevAbbrs.map((abbr) =>
         abbr.id === id ? { ...abbr, ...updatedData } : abbr
       )
     );
+    
+    // Also update in search results if present
+    if (isSearchMode) {
+      setSearchResults((prevResults) =>
+        prevResults.map((abbr) =>
+          abbr.id === id ? { ...abbr, ...updatedData } : abbr
+        )
+      );
+    }
+  }, [isSearchMode]);
+
+  // Handle search term change
+  const handleSearchChange = useCallback(async (term) => {
+    setSearchTerm(term);
+    
+    if (!term.trim()) {
+      // If search is cleared, exit search mode and show regular data
+      setIsSearchMode(false);
+      return;
+    }
+    
+    try {
+      setSearching(true);
+      setIsSearchMode(true);
+      setError(null);
+      
+      // Call server-side search function
+      const results = await searchAbbreviations(term);
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Error searching abbreviations:", error);
+      setError("Failed to search abbreviations. Please try again.");
+    } finally {
+      setSearching(false);
+    }
   }, []);
 
+  // Get the appropriate abbreviations to display
+  const displayedAbbreviations = useMemo(() => {
+    return isSearchMode ? searchResults : abbreviations;
+  }, [isSearchMode, searchResults, abbreviations]);
+
   return {
-    abbreviations,
-    loading,
+    abbreviations: displayedAbbreviations,
+    allAbbreviations: abbreviations,
+    loading: loading || searching,
     error,
     page,
-    hasMore,
+    hasMore: isSearchMode ? false : hasMore, // No infinite scroll in search mode
     totalCount,
+    searchTerm,
+    isSearchMode,
     loadAbbreviations,
     updateAbbreviationInList,
+    handleSearchChange,
   };
 };
 
@@ -364,6 +413,92 @@ const ErrorState = ({ message, onRetry }) => (
   </div>
 );
 
+// Search bar component
+const SearchBar = ({ searchTerm, onSearchChange }) => {
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+  const searchTimeoutRef = useRef(null);
+  
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
+  
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setLocalSearchTerm(value);
+    
+    // Debounce search to avoid too many requests
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    searchTimeoutRef.current = setTimeout(() => {
+      onSearchChange(value);
+    }, 300);
+  };
+
+  const handleClear = () => {
+    setLocalSearchTerm("");
+    onSearchChange("");
+  };
+
+  return (
+    <div className="relative mb-4">
+      <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+        <div className="pl-3 pr-2">
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-5 w-5 text-gray-400" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+            />
+          </svg>
+        </div>
+        <input
+          type="text"
+          placeholder="Search abbreviations..."
+          value={localSearchTerm}
+          onChange={handleChange}
+          className="w-full py-2 px-2 outline-none"
+        />
+        {localSearchTerm && (
+          <button 
+            onClick={handleClear}
+            className="px-3 text-gray-400 hover:text-gray-600"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M6 18L18 6M6 6l12 12" 
+              />
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+SearchBar.propTypes = {
+  searchTerm: PropTypes.string.isRequired,
+  onSearchChange: PropTypes.func.isRequired,
+};
+
 // Main AbbreviationList component
 const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -374,13 +509,17 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
   // Use custom hooks
   const {
     abbreviations,
+    allAbbreviations,
     loading,
     error,
     page,
     hasMore,
     totalCount,
+    searchTerm,
+    isSearchMode,
     loadAbbreviations,
     updateAbbreviationInList,
+    handleSearchChange,
   } = useAbbreviations(isOpen);
 
   const {
@@ -412,7 +551,7 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
 
   // Handle scroll events for infinite scrolling
   const handleScroll = useCallback(() => {
-    if (!tableContainerRef.current || loading || !hasMore) return;
+    if (!tableContainerRef.current || loading || !hasMore || isSearchMode) return;
 
     const { scrollTop, scrollHeight, clientHeight } = tableContainerRef.current;
 
@@ -420,7 +559,7 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
     if (scrollHeight - scrollTop - clientHeight < 100) {
       loadAbbreviations(page + 1);
     }
-  }, [loading, hasMore, page, loadAbbreviations]);
+  }, [loading, hasMore, page, loadAbbreviations, isSearchMode]);
 
   // Setup scroll event listener
   useEffect(() => {
@@ -446,12 +585,19 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
   const uniqueAbbreviations = Array.from(
     new Map(abbreviations.map((a) => [a.id, a])).values()
   );
+  
   if (error) {
     content = (
       <ErrorState message={error} onRetry={() => loadAbbreviations(0)} />
     );
   } else if (uniqueAbbreviations.length === 0 && !loading) {
-    content = <EmptyState />;
+    content = searchTerm ? (
+      <div className="flex justify-center items-center h-full">
+        <p>No abbreviations found matching &quot;{searchTerm}&quot;</p>
+      </div>
+    ) : (
+      <EmptyState />
+    );
   } else {
     content = (
       <>
@@ -475,6 +621,11 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
           </tbody>
         </table>
         {loading && <LoadingSpinner />}
+        {isSearchMode && !loading && (
+          <div className="text-center text-sm text-gray-500 mt-4">
+            Showing search results. <button onClick={() => handleSearchChange("")} className="text-blue-500 hover:underline">Clear search</button> to view all abbreviations.
+          </div>
+        )}
       </>
     );
   }
@@ -486,13 +637,17 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
     >
       <Header
         totalCount={totalCount}
-        abbreviationsCount={abbreviations.length}
+        abbreviationsCount={allAbbreviations.length}
         isReviewer={isReviewer}
         onAddClick={() => setShowAddDialog(true)}
         onClose={onClose}
       />
 
       <div ref={tableContainerRef} className="flex-1 overflow-y-auto p-4">
+        <SearchBar 
+          searchTerm={searchTerm} 
+          onSearchChange={handleSearchChange} 
+        />
         {content}
       </div>
 
