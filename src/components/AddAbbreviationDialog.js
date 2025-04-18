@@ -72,7 +72,7 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
     if (
       !newAbbreviation.convention ||
       !newAbbreviation.expansion ||
-      !newAbbreviation.image
+      !selectedFile
     ) {
       toast.error("Convention, expansion and image are required");
       return;

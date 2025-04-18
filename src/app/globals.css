@@ -22,3 +22,10 @@
 body {
   font-family: "Lato", "Trebuchet MS", Roboto, Helvetica, Arial, sans-serif;
 }
+
+/* Add styling for underlined Tibetan words */
+.underline-tibetan-word {
+  text-decoration: underline;
+  text-decoration-color: #3b82f6; /* Tibetan blue color */
+  cursor: pointer;
+}

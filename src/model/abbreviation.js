@@ -104,3 +104,121 @@ export const deleteAbbreviation = async (id) => {
     return null;
   }
 };
+
+/**
+ * Fetch all abbreviations (convention and expansion only).
+ * Returns an array of { convention, expansion } objects.
+ */
+export async function getAllAbbreviationConventions() {
+  try {
+    const abbreviations = await prisma.abbreviation.findMany({
+      select: {
+        convention: true,
+        expansion: true,
+      },
+      orderBy: {
+        convention: "asc",
+      },
+    });
+    return abbreviations;
+  } catch (error) {
+    console.error("Error fetching all abbreviation conventions:", error);
+    return [];
+  }
+}
+
+// search abbreviations
+export async function searchAbbreviations(searchTerm) {
+  try {
+    const abbreviations = await prisma.abbreviation.findMany({
+      where: {
+        OR: [
+          { convention: { contains: searchTerm, mode: "insensitive" } },
+          { expansion: { contains: searchTerm, mode: "insensitive" } },
+        ],
+      },
+      orderBy: {
+        convention: "asc",
+      },
+    });
+    return abbreviations;
+  } catch (error) {
+    console.error("Error searching abbreviations:", error);
+    return [];
+  }
+}
+
+/**
+ * Get tasks based on state and date range for CSV report generation
+ * @param {string} state - The task state to filter by (e.g., "transcribing", "submitted", etc.)
+ * @param {string} fromDate - Start date in ISO format (YYYY-MM-DD)
+ * @param {string} toDate - End date in ISO format (YYYY-MM-DD)
+ * @returns {Promise<Array>} - Array of tasks matching the criteria
+ */
+export async function getTasksForCsvReport(state, fromDate, toDate) {
+  try {
+    // Build the where condition
+    const whereCondition = {
+      state: state
+    };
+
+    // Add date filter if dates are provided
+    if (fromDate && toDate) {
+      // Determine which date field to use based on the state
+      let dateField;
+      if (state === "transcribing") {
+        // For transcribing tasks, use created_at
+        dateField = "created_at";
+      } else if (state === "submitted") {
+        // For submitted tasks, use submitted_at
+        dateField = "submitted_at";
+      } else if (state === "accepted") {
+        // For accepted tasks, use reviewed_at
+        dateField = "reviewed_at";
+      } else if (state === "finalised") {
+        // For finalised tasks, use final_reviewed_at
+        dateField = "final_reviewed_at";
+      } else if (state === "trashed") {
+        // For trashed tasks, use submitted_at (or when they were trashed)
+        dateField = "submitted_at";
+      }
+
+      // Only add date filter if we have a valid date field
+      if (dateField) {
+        whereCondition[dateField] = {
+          gte: new Date(`${fromDate}T00:00:00Z`),
+          lte: new Date(`${toDate}T23:59:59Z`)
+        };
+      }
+    }
+
+    // Query the database
+    const tasks = await prisma.task.findMany({
+      where: whereCondition,
+      include: {
+        transcriber: {
+          select: { name: true, email: true }
+        },
+        reviewer: {
+          select: { name: true, email: true }
+        },
+        final_reviewer: {
+          select: { name: true, email: true }
+        },
+        group: {
+          select: { name: true }
+        }
+      },
+      orderBy: [
+        { group_id: 'asc' },
+        { batch_id: 'asc' },
+        { id: 'asc' }
+      ]
+    });
+
+    return tasks;
+  } catch (error) {
+    console.error("Error fetching tasks for CSV report:", error);
+    throw new Error(`Failed to fetch tasks for CSV report: ${error.message}`);
+  }
+}

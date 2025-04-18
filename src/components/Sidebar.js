@@ -177,13 +177,20 @@ const Sidebar = ({
               <LanguageToggle />
             </section>
             {role === "FINAL_REVIEWER" && (
-              <section className="px-4 py-3 border-b border-b-[#384451]">
+              <section className="px-4 py-3 border-b border-b-[#384451] flex gap-2 justify-center">
                 <Link
                   href={`/dashboard/?session=${userDetail?.email}`}
                   type="button"
-                  className="btn btn-accent btn-wide"
+                  className="btn btn-accent btn-sm"
                 >
                   Dashboard
+                </Link>
+                <Link
+                  href={`/report?session=${userDetail?.email}`}
+                  type="button"
+                  className="btn btn-accent btn-sm"
+                >
+                  Csv Report
                 </Link>
               </section>
             )}
