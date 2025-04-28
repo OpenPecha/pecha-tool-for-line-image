@@ -127,75 +127,75 @@ export const assignUnassignedTasks = async (
   taskField,
   userId
 ) => {
-  // const unassignedTasks = await prisma.task.findMany({
-  //   where: { group_id: groupId, state, [taskField]: null },
-  //   select: {
-  //     id: true,
-  //     group_id: true,
-  //     state: true,
-  //     inference_transcript: true,
-  //     transcript: true,
-  //     reviewed_transcript: true,
-  //     final_reviewed_transcript: true,
-  //     url: true,
-  //     format: true,
-  //     transcriber: { select: { name: true } },
-  //     reviewer: { select: { name: true } },
-  //     reviewer_rejected_count: true,
-  //     final_reviewer_rejected_count: true,
-  //   },
-  //   orderBy: { id: "asc" },
-  //   take: ASSIGN_TASKS,
-  // });
+  const unassignedTasks = await prisma.task.findMany({
+    where: { group_id: groupId, state, [taskField]: null },
+    select: {
+      id: true,
+      group_id: true,
+      state: true,
+      inference_transcript: true,
+      transcript: true,
+      reviewed_transcript: true,
+      final_reviewed_transcript: true,
+      url: true,
+      format: true,
+      transcriber: { select: { name: true } },
+      reviewer: { select: { name: true } },
+      reviewer_rejected_count: true,
+      final_reviewer_rejected_count: true,
+    },
+    orderBy: { id: "asc" },
+    take: ASSIGN_TASKS,
+  });
 
-  const unassignedTasks = await prisma.$queryRaw(
-    Prisma.sql`
-      WITH ordered_batches AS (
-        SELECT DISTINCT 
-          batch_id,
-          SUBSTRING(batch_id FROM '^[^-]+') as prefix,
-          CAST(REGEXP_REPLACE(
-            SPLIT_PART(REPLACE(REPLACE(batch_id, 'Correction-', ''), 'Manual-', ''), 'a', 1),
-            '[^0-9]',
-            '',
-            'g'
-          ) AS INTEGER) as numeric_part
-        FROM "Task"
-        WHERE group_id = ${groupId}
-          AND state = ${state}::"State"
-          AND ${Prisma.raw(taskField)} IS NULL
-        ORDER BY 
-          prefix ASC,
-          numeric_part,
-          batch_id
-        LIMIT 1
-      )
-      SELECT 
-        t.id,
-        t.group_id,
-        t.state,
-        t.batch_id,
-        t.inference_transcript,
-        t.transcript,
-        t.reviewed_transcript,
-        t.final_reviewed_transcript,
-        t.url,
-        t.format,
-        t.reviewer_rejected_count,
-        t.final_reviewer_rejected_count,
-        tr.name as "transcriber.name",
-        r.name as "reviewer.name"
-      FROM "Task" t
-      LEFT JOIN "User" tr ON t.transcriber_id = tr.id
-      LEFT JOIN "User" r ON t.reviewer_id = r.id
-      WHERE 
-        t.group_id = ${groupId}
-        AND t.state = ${state}::"State"
-        AND t.${Prisma.raw(taskField)} IS NULL
-        AND t.batch_id = (SELECT batch_id FROM ordered_batches)
-      LIMIT ${ASSIGN_TASKS}
-    `
-  );
+  // const unassignedTasks = await prisma.$queryRaw(
+  //   Prisma.sql`
+  //     WITH ordered_batches AS (
+  //       SELECT DISTINCT
+  //         batch_id,
+  //         SUBSTRING(batch_id FROM '^[^-]+') as prefix,
+  //         CAST(REGEXP_REPLACE(
+  //           SPLIT_PART(REPLACE(REPLACE(batch_id, 'Correction-', ''), 'Manual-', ''), 'a', 1),
+  //           '[^0-9]',
+  //           '',
+  //           'g'
+  //         ) AS INTEGER) as numeric_part
+  //       FROM "Task"
+  //       WHERE group_id = ${groupId}
+  //         AND state = ${state}::"State"
+  //         AND ${Prisma.raw(taskField)} IS NULL
+  //       ORDER BY
+  //         prefix ASC,
+  //         numeric_part,
+  //         batch_id
+  //       LIMIT 1
+  //     )
+  //     SELECT
+  //       t.id,
+  //       t.group_id,
+  //       t.state,
+  //       t.batch_id,
+  //       t.inference_transcript,
+  //       t.transcript,
+  //       t.reviewed_transcript,
+  //       t.final_reviewed_transcript,
+  //       t.url,
+  //       t.format,
+  //       t.reviewer_rejected_count,
+  //       t.final_reviewer_rejected_count,
+  //       tr.name as "transcriber.name",
+  //       r.name as "reviewer.name"
+  //     FROM "Task" t
+  //     LEFT JOIN "User" tr ON t.transcriber_id = tr.id
+  //     LEFT JOIN "User" r ON t.reviewer_id = r.id
+  //     WHERE
+  //       t.group_id = ${groupId}
+  //       AND t.state = ${state}::"State"
+  //       AND t.${Prisma.raw(taskField)} IS NULL
+  //       AND t.batch_id = (SELECT batch_id FROM ordered_batches)
+  //     LIMIT ${ASSIGN_TASKS}
+  //   `
+  // );
 
   if (unassignedTasks.length > 0) {
     await prisma.task.updateMany({

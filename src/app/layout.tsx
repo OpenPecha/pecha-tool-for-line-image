@@ -3,8 +3,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Pecha HTR Tool",
-  description: "Tool by OpenPecha for HTR data",
+  title: "Pecha Normalisation Tool",
+  description: "Tool by OpenPecha for HTR Team",
 };
 
 export default function RootLayout({
