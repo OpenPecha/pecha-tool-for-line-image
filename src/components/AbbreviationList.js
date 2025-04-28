@@ -652,32 +652,34 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
   }
 
   return (
-    <div
-      className="fixed top-0 right-0 h-full w-1/4 bg-white shadow-lg z-50 overflow-hidden flex flex-col"
-      ref={sidebarRef}
-    >
-      <Header
-        totalCount={totalCount}
-        abbreviationsCount={allAbbreviations.length}
-        isReviewer={isReviewer}
-        onAddClick={() => setShowAddDialog(true)}
-        onClose={onClose}
-      />
-
-      <div ref={tableContainerRef} className="flex-1 overflow-y-auto p-4">
-        <SearchBar
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
+    <div className="absolute left-1/2 top-1/2 z-50 w-full h-full -translate-x-1/2 -translate-y-1/2 bg-white text-black rounded-lg shadow-lg flex flex-col p-4 overflow-y-auto border-2 border-[#384451]">
+      <div
+        className="fixed top-0 right-0 h-full w-full bg-white shadow-lg z-50 overflow-hidden flex flex-col"
+        ref={sidebarRef}
+      >
+        <Header
+          totalCount={totalCount}
+          abbreviationsCount={allAbbreviations.length}
+          isReviewer={isReviewer}
+          onAddClick={() => setShowAddDialog(true)}
+          onClose={onClose}
         />
-        {content}
-      </div>
 
-      {/* Add New Abbreviation Dialog */}
-      <AddAbbreviationDialog
-        isOpen={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-        onSuccess={handleAddSuccess}
-      />
+        <div ref={tableContainerRef} className="flex-1 overflow-y-auto p-4">
+          <SearchBar
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+          />
+          {content}
+        </div>
+
+        {/* Add New Abbreviation Dialog */}
+        <AddAbbreviationDialog
+          isOpen={showAddDialog}
+          onClose={() => setShowAddDialog(false)}
+          onSuccess={handleAddSuccess}
+        />
+      </div>
     </div>
   );
 };

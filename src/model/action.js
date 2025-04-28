@@ -3,7 +3,6 @@
 import { formatTime } from "@/lib/formatTime";
 import prisma from "@/service/db";
 import { revalidatePath } from "next/cache";
-import { Prisma } from "@prisma/client";
 
 const ASSIGN_TASKS = 10;
 const MAX_HISTORY = 10;
