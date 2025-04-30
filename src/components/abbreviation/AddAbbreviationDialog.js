@@ -145,7 +145,7 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
             name="convention"
             value={newAbbreviation.convention}
             onChange={handleNewAbbrChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded bg-white"
             placeholder="Enter convention"
           />
         </div>
@@ -163,7 +163,7 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
             name="expansion"
             value={newAbbreviation.expansion}
             onChange={handleNewAbbrChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded bg-white"
             placeholder="Enter expansion"
           />
         </div>

@@ -479,7 +479,7 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
           placeholder="Search abbreviations..."
           value={localSearchTerm}
           onChange={handleChange}
-          className="w-full py-2 px-2 outline-none"
+          className="w-full py-2 px-2 outline-none bg-white"
         />
         {localSearchTerm && (
           <button

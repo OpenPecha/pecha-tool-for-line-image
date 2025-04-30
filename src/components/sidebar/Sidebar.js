@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import AppContext from "./AppContext";
+import AppContext from "../AppContext";
 import { useContext } from "react";
-import LanguageToggle from "./LanguageToggle";
+import LanguageToggle from "../LanguageToggle";
 import { BsCheckLg } from "react-icons/bs";
 import { getTaskWithRevertedState } from "@/model/task";
 import Link from "next/link";
-import ActionButtons from "./ActionButtons";
-import RightSidebar from "@/components/RightSidebar";
+import ActionButtons from "../buttons/ActionButtons";
 import { AiOutlineStop } from "react-icons/ai";
 import TranscriptDisplay from "@/components/TranscriptDisplay";
-import AbbreviationList from "./AbbreviationList";
+import AbbreviationList from "../abbreviation/AbbreviationList";
 
 const Sidebar = ({
   children,

@@ -2,7 +2,7 @@
 import React from "react";
 import { BsCheckLg, BsXLg } from "react-icons/bs";
 import { useContext, useEffect } from "react";
-import AppContext from "./AppContext";
+import AppContext from "../AppContext";
 import { AiOutlineStop } from "react-icons/ai";
 const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {
   // a = 65 submit, x = 88 reject , s = 83 save, t = 84 trash

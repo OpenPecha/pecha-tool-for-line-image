@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import BurgerIcon from "./BurgerIcon";
+import BurgerIcon from "../BurgerIcon";
 export default function Sidebar({ children }) {
   const [showSidebar, setShowSidebar] = useState(false);
 

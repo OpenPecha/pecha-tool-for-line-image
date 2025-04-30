@@ -4,7 +4,7 @@ import { getTasksOrAssignMore, updateTask } from "@/model/action";
 import { getAllAbbreviationConventions } from "@/model/abbreviation";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { UserProgressStats } from "@/model/task";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import toast from "react-hot-toast";
 import AppContext from "./AppContext";
 import DisplayImage from "@/components/DisplayImage";
@@ -17,7 +17,7 @@ import Text from "@tiptap/extension-text";
 import TextStyle from "@tiptap/extension-text-style";
 import HardBreak from "@tiptap/extension-hard-break";
 import History from "@tiptap/extension-history";
-import AbbreviationList from "@/components/AbbreviationList";
+import AbbreviationList from "@/components/abbreviation/AbbreviationList";
 import { UnderlineTibetanWords } from "./UnderlineTibetanWords";
 
 // Custom hook for user progress stats
