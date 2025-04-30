@@ -341,7 +341,7 @@ const AbbreviationRow = ({
           name="convention"
           value={editValues.convention}
           onChange={onEditChange}
-          className="w-full p-1 border border-gray-300 rounded"
+          className="w-full p-1 border border-gray-300 rounded bg-white"
           disabled={isSubmitting}
         />
       ) : (
@@ -358,7 +358,7 @@ const AbbreviationRow = ({
           name="expansion"
           value={editValues.expansion}
           onChange={onEditChange}
-          className="w-full p-1 border border-gray-300 rounded"
+          className="w-full p-1 border border-gray-300 rounded bg-white"
           disabled={isSubmitting}
         />
       ) : (
@@ -517,7 +517,7 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const tableContainerRef = useRef(null);
   const sidebarRef = useRef(null);
-  const isReviewer = userRole === "REVIEWER";
+  const isReviewer = userRole === "REVIEWER" || userRole === "FINAL_REVIEWER";
 
   // Use custom hooks
   const {

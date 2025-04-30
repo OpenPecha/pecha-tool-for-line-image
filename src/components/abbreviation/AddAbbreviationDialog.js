@@ -69,12 +69,8 @@ const AddAbbreviationDialog = ({ isOpen, onClose, onSuccess }) => {
 
   // Submit new abbreviation
   const handleAddAbbreviation = async () => {
-    if (
-      !newAbbreviation.convention ||
-      !newAbbreviation.expansion ||
-      !selectedFile
-    ) {
-      toast.error("Convention, expansion and image are required");
+    if (!newAbbreviation.convention || !newAbbreviation.expansion) {
+      toast.error("Convention and expansion are required");
       return;
     }
 
