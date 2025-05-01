@@ -13,6 +13,7 @@ import {
   getAbbreviations,
   updateAbbreviation,
   searchAbbreviations,
+  deleteAbbreviation,
 } from "@/model/abbreviation";
 import toast from "react-hot-toast";
 import AddAbbreviationDialog from "./AddAbbreviationDialog";
@@ -319,6 +320,7 @@ const AbbreviationRow = ({
   onCancel,
   onEditChange,
   isSubmitting,
+  onDelete,
 }) => (
   <tr key={abbr.id}>
     <td className="px-6 py-4 whitespace-nowrap">
@@ -390,12 +392,20 @@ const AbbreviationRow = ({
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => onEdit(abbr)}
-            className="text-indigo-600 hover:text-indigo-900"
-          >
-            Edit
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => onEdit(abbr)}
+              className="text-indigo-600 hover:text-indigo-900"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => onDelete(abbr.id)}
+              className="text-red-600 hover:text-red-900"
+            >
+              Delete
+            </button>
+          </div>
         )}
       </td>
     )}
@@ -548,6 +558,21 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "", isSidebar }) => {
     saveEdit,
   } = useAbbreviationEditor(updateAbbreviationInList);
 
+  const handleDeleteAbbreviation = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this abbreviation?")) return;
+    try {
+      const result = await deleteAbbreviation(id);
+      if (result) {
+        toast.success("Abbreviation deleted successfully");
+        await loadAbbreviations(0); // reload list
+      } else {
+        toast.error("Failed to delete abbreviation");
+      }
+    } catch (error) {
+      toast.error("Error deleting abbreviation");
+    }
+  };
+
   // Handle click outside to close sidebar
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -633,6 +658,7 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "", isSidebar }) => {
                 onCancel={cancelEditing}
                 onEditChange={handleEditChange}
                 isSubmitting={isSubmitting}
+                onDelete={handleDeleteAbbreviation}
               />
             ))}
           </tbody>

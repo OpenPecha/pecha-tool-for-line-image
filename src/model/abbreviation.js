@@ -159,7 +159,7 @@ export async function getTasksForCsvReport(state, fromDate, toDate) {
   try {
     // Build the where condition
     const whereCondition = {
-      state: state
+      state: state,
     };
 
     // Add date filter if dates are provided
@@ -187,7 +187,7 @@ export async function getTasksForCsvReport(state, fromDate, toDate) {
       if (dateField) {
         whereCondition[dateField] = {
           gte: new Date(`${fromDate}T00:00:00Z`),
-          lte: new Date(`${toDate}T23:59:59Z`)
+          lte: new Date(`${toDate}T23:59:59Z`),
         };
       }
     }
@@ -197,23 +197,19 @@ export async function getTasksForCsvReport(state, fromDate, toDate) {
       where: whereCondition,
       include: {
         transcriber: {
-          select: { name: true, email: true }
+          select: { name: true, email: true },
         },
         reviewer: {
-          select: { name: true, email: true }
+          select: { name: true, email: true },
         },
         final_reviewer: {
-          select: { name: true, email: true }
+          select: { name: true, email: true },
         },
         group: {
-          select: { name: true }
-        }
+          select: { name: true },
+        },
       },
-      orderBy: [
-        { group_id: 'asc' },
-        { batch_id: 'asc' },
-        { id: 'asc' }
-      ]
+      orderBy: [{ group_id: "asc" }, { batch_id: "asc" }, { id: "asc" }],
     });
 
     return tasks;
