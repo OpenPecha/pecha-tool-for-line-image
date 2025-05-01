@@ -291,28 +291,6 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
             <h1 className="font-bold text-md md:text-3xl">loading...</h1>
           ) : taskList?.length ? (
             <>
-              <div className="w-full flex justify-end px-4 mt-2">
-                <button
-                  onClick={() => setIsAbbreviationSidebarOpen((v) => !v)}
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                  aria-label="Toggle abbreviation sidebar"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                </button>
-              </div>
               {(role === "REVIEWER" || role === "FINAL_REVIEWER") && (
                 <div>
                   <p className="mt-4 md:mt-10 text-black">
@@ -355,11 +333,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
           )}
         </div>
       </Sidebar>
-      <AbbreviationList
-        isOpen={isAbbreviationSidebarOpen}
-        onClose={() => setIsAbbreviationSidebarOpen(false)}
-        userRole={role}
-      />
+
       {tooltip.visible && (
         <div
           style={{

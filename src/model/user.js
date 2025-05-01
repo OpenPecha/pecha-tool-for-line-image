@@ -14,6 +14,20 @@ import {
 
 const levenshtein = require("fast-levenshtein");
 
+export const getUserByEmail = async (email) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error("Failed to retrieve user:", error);
+    throw new Error("Failed to retrieve user.");
+  }
+};
+
 export const getAllUser = async () => {
   try {
     const users = await prisma.user.findMany({

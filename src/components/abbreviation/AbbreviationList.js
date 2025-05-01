@@ -220,6 +220,7 @@ const Header = ({
   isReviewer,
   onAddClick,
   onClose,
+  isSidebar,
 }) => (
   <div className="flex justify-between items-center p-4 border-b">
     <h2 className="text-xl font-semibold">
@@ -247,26 +248,28 @@ const Header = ({
           </svg>
         </button>
       )}
-      <button
-        onClick={onClose}
-        className="p-2 hover:bg-gray-100 rounded-full"
-        aria-label="Close sidebar"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      {isSidebar && (
+        <button
+          onClick={onClose}
+          className="p-2 hover:bg-gray-100 rounded-full"
+          aria-label="Close sidebar"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      )}
     </div>
   </div>
 );
@@ -513,7 +516,7 @@ SearchBar.propTypes = {
 };
 
 // Main AbbreviationList component
-const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
+const AbbreviationList = ({ isOpen, onClose, userRole = "", isSidebar }) => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const tableContainerRef = useRef(null);
   const sidebarRef = useRef(null);
@@ -652,9 +655,17 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
   }
 
   return (
-    <div className="absolute left-1/2 top-1/2 z-50 w-full h-full -translate-x-1/2 -translate-y-1/2 bg-white text-black rounded-lg shadow-lg flex flex-col p-4 overflow-y-auto border-2 border-[#384451]">
+    <div
+      className={` ${
+        isSidebar
+          ? "absolute left-1/2 top-1/2 z-50 w-full h-full -translate-x-1/2 -translate-y-1/2 bg-white text-black rounded-lg shadow-lg flex flex-col p-4 overflow-y-auto border-2 border-[#384451]"
+          : "flex flex-col justify-center items-center"
+      }`}
+    >
       <div
-        className="fixed top-0 right-0 h-full w-full bg-white shadow-lg z-50 overflow-hidden flex flex-col"
+        className={`fixed top-0 h-full  bg-white shadow-lg z-50 overflow-hidden flex flex-col
+        ${isSidebar ? "w-full" : "w-1/2"}
+         `}
         ref={sidebarRef}
       >
         <Header
@@ -663,6 +674,7 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "" }) => {
           isReviewer={isReviewer}
           onAddClick={() => setShowAddDialog(true)}
           onClose={onClose}
+          isSidebar={isSidebar}
         />
 
         <div ref={tableContainerRef} className="flex-1 overflow-y-auto p-4">
@@ -688,6 +700,7 @@ AbbreviationList.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   userRole: PropTypes.string,
+  isSidebar: PropTypes.bool.isRequired,
 };
 
 export default AbbreviationList;

@@ -104,6 +104,7 @@ const Sidebar = ({
                 isOpen={isAbbreviationSidebarOpen}
                 onClose={() => setIsAbbreviationSidebarOpen(false)}
                 userRole={role}
+                isSidebar={true}
               />
             </div>
           </section>
@@ -213,6 +214,13 @@ const Sidebar = ({
                 className="btn btn-accent btn-sm"
               >
                 Csv Report
+              </Link>
+              <Link
+                href={`/dictionary?session=${userDetail?.email}`}
+                type="button"
+                className="btn btn-accent btn-sm"
+              >
+                Dictionary
               </Link>
             </section>
           )}
