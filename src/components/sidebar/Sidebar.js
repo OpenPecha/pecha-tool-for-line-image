@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import AppContext from "../AppContext";
-import { useContext } from "react";
 import LanguageToggle from "../LanguageToggle";
 import { BsCheckLg } from "react-icons/bs";
 import { getTaskWithRevertedState } from "@/model/task";

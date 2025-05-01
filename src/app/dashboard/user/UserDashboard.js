@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
-import DashboardBtn from "@/components/DashboardBtn";
+import DashboardBtn from "@/components/buttons/DashboardBtn";
 import AddUserModal from "./AddUserModal";
 import { removeUser } from "@/model/user";
 import EditUserModal from "./EditUserModal";

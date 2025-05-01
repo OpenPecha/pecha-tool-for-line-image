@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import AppContext from "@/components/AppContext";
 import DemoSidebar from "./DemoSidebar";
-import ActionButtons from "@/components/ActionButtons";
+import ActionButtons from "@/components/buttons/ActionButtons";
 import { changeTaskState } from "@/model/action";
 import Image from "next/image";
 

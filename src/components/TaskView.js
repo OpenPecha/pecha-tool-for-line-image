@@ -17,7 +17,6 @@ import Text from "@tiptap/extension-text";
 import TextStyle from "@tiptap/extension-text-style";
 import HardBreak from "@tiptap/extension-hard-break";
 import History from "@tiptap/extension-history";
-import AbbreviationList from "@/components/abbreviation/AbbreviationList";
 import { UnderlineTibetanWords } from "./UnderlineTibetanWords";
 
 // Custom hook for user progress stats

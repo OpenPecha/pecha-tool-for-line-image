@@ -1,7 +1,6 @@
 "use client";
-import React from "react";
 import { BsCheckLg, BsXLg } from "react-icons/bs";
-import { useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import AppContext from "../AppContext";
 import { AiOutlineStop } from "react-icons/ai";
 const ActionButtons = ({ updateTaskAndIndex, tasks, transcript, role }) => {

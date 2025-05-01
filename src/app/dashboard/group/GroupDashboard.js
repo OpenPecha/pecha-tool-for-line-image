@@ -1,6 +1,6 @@
 "use client";
 
-import DashboardBtn from "@/components/DashboardBtn";
+import DashboardBtn from "@/components/buttons/DashboardBtn";
 import React, { useState } from "react";
 import { AiOutlinePlus } from "react-icons/ai";
 import AddGroupModal from "./AddGroupModal";
