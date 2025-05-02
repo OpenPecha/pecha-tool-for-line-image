@@ -2,11 +2,10 @@ import Image from "next/image";
 import React, { useRef, useCallback } from "react";
 import { useZoomImageMove } from "@zoom-image/react";
 
-function DisplayImage({ task }) {
+function DisplayImage({ url }) {
   const containerRef = useRef(null);
   const { createZoomImage } = useZoomImageMove();
 
-  const url = task?.url;
   const handleImageLoad = useCallback(() => {
     if (containerRef.current) {
       createZoomImage(containerRef.current, {

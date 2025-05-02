@@ -314,7 +314,7 @@ const TaskView = ({ tasks, userDetail, language, userHistory }) => {
               )}
               <div className="w-[90%] my-5 md:my-10">
                 <div className="flex flex-col gap-10 border rounded-md shadow-sm shadow-gray-400 items-center p-4">
-                  <DisplayImage task={taskList[0]} />
+                  <DisplayImage url={taskList[0]?.url} />
                   <TipTap
                     transcript={transcript}
                     editor={editor}
