@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Normalisation Tool",
-  description: "Tool by OpenPecha for HTR Team",
+  description: "Tool by OpenPecha for Normalisation Team",
 };
 
 export default function RootLayout({

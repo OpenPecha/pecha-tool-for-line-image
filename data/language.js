@@ -1,6 +1,6 @@
 let languagesObject = {
   en: {
-    title: "Pecha HTR Tool",
+    title: "Pecha Normalisation Tool",
     project: "Project Info",
     user: "User",
     group: "Group",
@@ -24,7 +24,7 @@ let languagesObject = {
     history: "History",
   },
   bo: {
-    title: "Pecha HTR Tool",
+    title: "Pecha Normalisation Tool",
     project: "ལས་འཆར་ཆ་འཕྲིན།",
     user: "སྤྱོད་མཁན།",
     group: "སྡེ་ཚན།",
