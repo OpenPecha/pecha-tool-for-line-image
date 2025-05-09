@@ -709,7 +709,7 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "", isSidebar }) => {
 
         <div
           ref={tableContainerRef}
-          className="flex-1 h-full overflow-y-auto p-4"
+          className="h-[calc(100vh-100px)] overflow-y-auto p-4"
         >
           <SearchBar
             searchTerm={searchTerm}
