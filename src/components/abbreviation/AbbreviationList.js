@@ -559,7 +559,8 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "", isSidebar }) => {
   } = useAbbreviationEditor(updateAbbreviationInList);
 
   const handleDeleteAbbreviation = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this abbreviation?")) return;
+    if (!window.confirm("Are you sure you want to delete this abbreviation?"))
+      return;
     try {
       const result = await deleteAbbreviation(id);
       if (result) {
@@ -682,16 +683,19 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "", isSidebar }) => {
 
   return (
     <div
-      className={` ${
+      className={
         isSidebar
-          ? "absolute left-1/2 top-1/2 z-50 w-full h-full -translate-x-1/2 -translate-y-1/2 bg-white text-black rounded-lg shadow-lg flex flex-col p-4 overflow-y-auto border-2 border-[#384451]"
-          : "flex flex-col justify-center items-center"
-      }`}
+          ? "fixed inset-0 z-50 w-full h-full bg-white text-black rounded-lg shadow-lg flex flex-col border-2 border-[#384451]"
+          : "flex flex-col justify-center items-center w-full h-full bg-white"
+      }
+      style={{ minHeight: "100vh" }}
     >
       <div
-        className={`fixed top-0 h-full  bg-white shadow-lg z-50 overflow-hidden flex flex-col
-        ${isSidebar ? "w-full" : "w-1/2"}
-         `}
+        className={
+          isSidebar
+            ? "fixed top-0 left-0 w-full h-full bg-white shadow-lg z-50 overflow-hidden flex flex-col"
+            : "fixed top-0 w-1/2 h-full bg-white shadow-lg z-50 overflow-hidden flex flex-col"
+        }
         ref={sidebarRef}
       >
         <Header
@@ -703,7 +707,10 @@ const AbbreviationList = ({ isOpen, onClose, userRole = "", isSidebar }) => {
           isSidebar={isSidebar}
         />
 
-        <div ref={tableContainerRef} className="flex-1 overflow-y-auto p-4">
+        <div
+          ref={tableContainerRef}
+          className="flex-1 min-h-0 overflow-y-auto p-4"
+        >
           <SearchBar
             searchTerm={searchTerm}
             onSearchChange={handleSearchChange}
